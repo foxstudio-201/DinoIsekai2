@@ -55,6 +55,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -73,20 +75,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.ServerPing
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.AccountType
 import com.movtery.zalithlauncher.game.account.localLogin
+import com.movtery.zalithlauncher.game.addons.modloader.forgelike.forge.ForgeVersions
+import com.movtery.zalithlauncher.game.download.game.GameDownloadInfo
+import com.movtery.zalithlauncher.game.download.game.GameInstaller
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
+import com.movtery.zalithlauncher.ui.screens.content.elements.TitleTaskFlowDialog
 import com.movtery.zalithlauncher.ui.screens.main.custom_home.MarkdownBlock
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.removeAndNavigateTo
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun LauncherScreen(
@@ -133,6 +141,11 @@ private fun DinoHomepage(
     var showPass by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
     var pingResult by remember { mutableStateOf<com.movtery.zalithlauncher.game.PingResult?>(null) }
+
+    var installing by remember { mutableStateOf(false) }
+    var installer by remember { mutableStateOf<GameInstaller?>(null) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -430,6 +443,7 @@ private fun DinoHomepage(
                 shape = RoundedCornerShape(16.dp),
                 color = Color(0xFF7C3AED),
                 onClick = {
+                    if (installing) return@Surface
                     if (username.isBlank()) { errorMsg = "Nhập tên người chơi!"; return@Surface }
                     if (password.isBlank()) { errorMsg = "Nhập mật khẩu!"; return@Surface }
                     if (username.length < 3 || username.length > 16) { errorMsg = "Tên 3-16 ký tự"; return@Surface }
@@ -439,8 +453,62 @@ private fun DinoHomepage(
                     if (existing != null) AccountsManager.setCurrentAccount(existing)
                     else localLogin(username, null)
                     val ver = targetVersion ?: currentVersion
-                    if (ver != null && ver.isValid()) onLaunchGame(ver)
-                    else errorMsg = "Chưa có phiên bản game"
+                    if (ver != null && ver.isValid()) {
+                        onLaunchGame(ver)
+                    } else {
+                        errorMsg = null
+                        installing = true
+                        scope.launch {
+                            try {
+                                val forgeList = ForgeVersions.fetchForgeList("1.20.1")
+                                val forge = forgeList?.firstOrNull { it.isRecommended }
+                                    ?: forgeList?.firstOrNull()
+                                if (forge == null) {
+                                    errorMsg = "Không tìm thấy Forge cho 1.20.1"
+                                    installing = false
+                                    return@launch
+                                }
+                                val versionName = "${forge.inherit}-forge-${forge.fileVersion}"
+                                val info = GameDownloadInfo(
+                                    gameVersion = "1.20.1",
+                                    customVersionName = versionName,
+                                    overwrite = false,
+                                    forge = forge
+                                )
+                                val inst = GameInstaller(context, info, scope)
+                                installer = inst
+                                inst.installGame(
+                                    isRunning = {},
+                                    onInstalled = { installedName ->
+                                        installing = false
+                                        VersionsManager.refresh("[Home] installed", installedName)
+                                        val installedVersion = VersionsManager.getVersion(installedName)
+                                        if (installedVersion != null && installedVersion.isValid()) {
+                                            VersionsManager.saveVersion(installedVersion)
+                                            onLaunchGame(installedVersion)
+                                        } else errorMsg = "Đã cài xong nhưng không thấy bản game"
+                                    },
+                                    onError = { th ->
+                                        installing = false
+                                        installer = null
+                                        errorMsg = th.message ?: "Lỗi cài đặt game"
+                                    },
+                                    onGameAlreadyInstalled = {
+                                        installing = false
+                                        VersionsManager.refresh("[Home] refresh")
+                                        val installedVersion = VersionsManager.getVersion(versionName)
+                                        if (installedVersion != null && installedVersion.isValid()) {
+                                            VersionsManager.saveVersion(installedVersion)
+                                            onLaunchGame(installedVersion)
+                                        } else errorMsg = "Game đã tồn tại nhưng không mở được"
+                                    }
+                                )
+                            } catch (th: Throwable) {
+                                installing = false
+                                errorMsg = th.message ?: "Lỗi cài đặt game"
+                            }
+                        }
+                    }
                 },
                 interactionSource = boxInteraction,
             ) {
@@ -487,6 +555,20 @@ private fun DinoHomepage(
             }
 
             Spacer(Modifier.weight(1f))
+        }
+
+        installer?.let { inst ->
+            val tasks by inst.tasksFlow.collectAsStateWithLifecycle()
+            if (installing || tasks.isNotEmpty()) {
+                TitleTaskFlowDialog(
+                    title = "Đang cài đặt Minecraft 1.20.1 + Forge",
+                    tasks = tasks,
+                    onCancel = {
+                        inst.cancelInstall()
+                        installing = false
+                    }
+                )
+            }
         }
     }
 }
