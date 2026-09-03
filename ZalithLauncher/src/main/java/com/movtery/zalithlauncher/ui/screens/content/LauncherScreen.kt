@@ -80,7 +80,6 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.ServerPing
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.AccountType
-import com.movtery.zalithlauncher.game.account.localLogin
 import com.movtery.zalithlauncher.game.addons.modloader.forgelike.forge.ForgeVersions
 import com.movtery.zalithlauncher.game.dinostate.DinoStateSync
 import com.movtery.zalithlauncher.game.dinostate.DinoStateType
@@ -512,8 +511,9 @@ private fun DinoHomepage(
                     if (!username.matches(Regex("^[a-zA-Z0-9_]+$"))) { errorMsg = "Chỉ dùng a-z, 0-9, _"; return@Surface }
                     errorMsg = null
                     val existing = accounts.find { it.username == username && it.accountType == AccountType.LOCAL.tag }
-                    if (existing != null) AccountsManager.setCurrentAccount(existing)
-                    else localLogin(username, null)
+                    if (existing != null) {
+                        AccountsManager.setCurrentAccount(existing)
+                    }
                     val ver = VersionsManager.getVersion(FIXED_VERSION_NAME)
                     if (ver != null && ver.isValid()) {
                         onLaunchGame(ver)
@@ -522,6 +522,13 @@ private fun DinoHomepage(
                         installing = true
                         scope.launch {
                             try {
+                                if (existing == null) {
+                                    val acc = com.movtery.zalithlauncher.game.account.Account(
+                                        username = username,
+                                        accountType = AccountType.LOCAL.tag
+                                    )
+                                    AccountsManager.suspendSaveAccount(acc)
+                                }
                                 val forgeList = ForgeVersions.fetchForgeList("1.20.1")
                                 val forge = forgeList?.firstOrNull { it.isRecommended }
                                     ?: forgeList?.firstOrNull()

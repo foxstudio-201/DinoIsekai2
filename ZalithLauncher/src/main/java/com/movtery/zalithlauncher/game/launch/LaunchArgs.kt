@@ -131,6 +131,9 @@ class LaunchArgs(
             Logger.warning(TAG, msg, it)
         }.getOrNull()?.let { parsed ->
             val port = parsed.port.takeIf { it >= 0 } ?: ServerAddress.DEFAULT_PORT
+            val msg = "Auto-joining server ${parsed.getASCIIHost()}:$port"
+            LoggerBridge.append(msg)
+            Logger.info(TAG, msg)
             addAll(listOf("--server", parsed.getASCIIHost(), "--port", port.toString()))
         }
     }
