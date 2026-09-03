@@ -96,6 +96,8 @@ import com.movtery.zalithlauncher.ui.screens.removeAndNavigateTo
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
 import kotlinx.coroutines.launch
 
+private const val FIXED_VERSION_NAME = "1.20.1-Forge"
+
 @Composable
 fun LauncherScreen(
     backStackViewModel: ScreenBackStackViewModel,
@@ -133,7 +135,6 @@ private fun DinoHomepage(
 ) {
     val accounts by AccountsManager.accountsFlow.collectAsState()
     val accCurrent by AccountsManager.currentAccountFlow.collectAsState()
-    val versions by VersionsManager.versions.collectAsState()
     val currentVersion by VersionsManager.currentVersion.collectAsState()
 
     var username by remember { mutableStateOf(accCurrent?.username ?: "") }
@@ -152,13 +153,6 @@ private fun DinoHomepage(
             pingResult = com.movtery.zalithlauncher.game.ServerPing.ping("160.250.134.97", 3026)
             kotlinx.coroutines.delay(8000)
         }
-    }
-
-    val targetVersion = remember(versions) {
-        versions.firstOrNull { v ->
-            val name = v.getVersionName()
-            name.contains("1.20.1") || name.contains("forge") || name.contains("Forge")
-        } ?: versions.firstOrNull()
     }
 
     val boxInteraction = remember { MutableInteractionSource() }
@@ -452,7 +446,7 @@ private fun DinoHomepage(
                     val existing = accounts.find { it.username == username && it.accountType == AccountType.LOCAL.tag }
                     if (existing != null) AccountsManager.setCurrentAccount(existing)
                     else localLogin(username, null)
-                    val ver = targetVersion ?: currentVersion
+                    val ver = VersionsManager.getVersion(FIXED_VERSION_NAME)
                     if (ver != null && ver.isValid()) {
                         onLaunchGame(ver)
                     } else {
@@ -468,10 +462,9 @@ private fun DinoHomepage(
                                     installing = false
                                     return@launch
                                 }
-                                val versionName = "${forge.inherit}-forge-${forge.fileVersion}"
                                 val info = GameDownloadInfo(
                                     gameVersion = "1.20.1",
-                                    customVersionName = versionName,
+                                    customVersionName = FIXED_VERSION_NAME,
                                     overwrite = false,
                                     forge = forge
                                 )
@@ -479,14 +472,10 @@ private fun DinoHomepage(
                                 installer = inst
                                 inst.installGame(
                                     isRunning = {},
-                                    onInstalled = { installedName ->
+                                    onInstalled = {
                                         installing = false
-                                        VersionsManager.refresh("[Home] installed", installedName)
-                                        val installedVersion = VersionsManager.getVersion(installedName)
-                                        if (installedVersion != null && installedVersion.isValid()) {
-                                            VersionsManager.saveVersion(installedVersion)
-                                            onLaunchGame(installedVersion)
-                                        } else errorMsg = "Đã cài xong nhưng không thấy bản game"
+                                        installer = null
+                                        scope.launch { launchFixedVersion(onLaunchGame) }
                                     },
                                     onError = { th ->
                                         installing = false
@@ -495,12 +484,8 @@ private fun DinoHomepage(
                                     },
                                     onGameAlreadyInstalled = {
                                         installing = false
-                                        VersionsManager.refresh("[Home] refresh")
-                                        val installedVersion = VersionsManager.getVersion(versionName)
-                                        if (installedVersion != null && installedVersion.isValid()) {
-                                            VersionsManager.saveVersion(installedVersion)
-                                            onLaunchGame(installedVersion)
-                                        } else errorMsg = "Game đã tồn tại nhưng không mở được"
+                                        installer = null
+                                        scope.launch { launchFixedVersion(onLaunchGame) }
                                     }
                                 )
                             } catch (th: Throwable) {
@@ -573,9 +558,19 @@ private fun DinoHomepage(
     }
 }
 
+private suspend fun launchFixedVersion(onLaunchGame: (Version?) -> Unit) {
+    VersionsManager.refresh("[Home] refresh", FIXED_VERSION_NAME)
+    VersionsManager.waitForRefresh()
+    val installed = VersionsManager.getVersion(FIXED_VERSION_NAME)
+    if (installed != null && installed.isValid()) {
+        onLaunchGame(installed)
+    } else {
+        onLaunchGame(null)
+    }
+}
+
 @Composable
-private fun ChipBadge(text: String, color: Color, borderColor: Color) {
-    Surface(
+private fun ChipBadge(text: String, color: Color, borderColor: Color) {    Surface(
         shape = RoundedCornerShape(20.dp),
         color = color.copy(alpha = 0.12f),
         border = BorderStroke(1.dp, color.copy(alpha = 0.3f)),
