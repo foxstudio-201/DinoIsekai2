@@ -472,10 +472,20 @@ private fun DinoHomepage(
                                 installer = inst
                                 inst.installGame(
                                     isRunning = {},
-                                    onInstalled = {
+                                    onInstalled = { installedName ->
                                         installing = false
                                         installer = null
-                                        scope.launch { launchFixedVersion(onLaunchGame) }
+                                        scope.launch {
+                                            VersionsManager.refresh("[Home] installed", installedName)
+                                            VersionsManager.waitForRefresh()
+                                            val installed = VersionsManager.getVersion(installedName)
+                                            if (installed != null && installed.isValid()) {
+                                                VersionsManager.saveVersion(installed)
+                                                onLaunchGame(installed)
+                                            } else {
+                                                errorMsg = "Đã cài xong nhưng không mở được game"
+                                            }
+                                        }
                                     },
                                     onError = { th ->
                                         installing = false
@@ -485,7 +495,17 @@ private fun DinoHomepage(
                                     onGameAlreadyInstalled = {
                                         installing = false
                                         installer = null
-                                        scope.launch { launchFixedVersion(onLaunchGame) }
+                                        scope.launch {
+                                            VersionsManager.refresh("[Home] refresh", FIXED_VERSION_NAME)
+                                            VersionsManager.waitForRefresh()
+                                            val installed = VersionsManager.getVersion(FIXED_VERSION_NAME)
+                                            if (installed != null && installed.isValid()) {
+                                                VersionsManager.saveVersion(installed)
+                                                onLaunchGame(installed)
+                                            } else {
+                                                errorMsg = "Game đã tồn tại nhưng không mở được"
+                                            }
+                                        }
                                     }
                                 )
                             } catch (th: Throwable) {
@@ -558,19 +578,9 @@ private fun DinoHomepage(
     }
 }
 
-private suspend fun launchFixedVersion(onLaunchGame: (Version?) -> Unit) {
-    VersionsManager.refresh("[Home] refresh", FIXED_VERSION_NAME)
-    VersionsManager.waitForRefresh()
-    val installed = VersionsManager.getVersion(FIXED_VERSION_NAME)
-    if (installed != null && installed.isValid()) {
-        onLaunchGame(installed)
-    } else {
-        onLaunchGame(null)
-    }
-}
-
 @Composable
-private fun ChipBadge(text: String, color: Color, borderColor: Color) {    Surface(
+private fun ChipBadge(text: String, color: Color, borderColor: Color) {
+    Surface(
         shape = RoundedCornerShape(20.dp),
         color = color.copy(alpha = 0.12f),
         border = BorderStroke(1.dp, color.copy(alpha = 0.3f)),
