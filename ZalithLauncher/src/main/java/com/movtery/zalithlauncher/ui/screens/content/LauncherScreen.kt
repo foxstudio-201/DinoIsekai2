@@ -20,6 +20,7 @@ package com.movtery.zalithlauncher.ui.screens.content
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -263,46 +264,55 @@ private fun DinoHomepage(
             Spacer(Modifier.height(28.dp))
 
             ModernCard {
-                Text(
-                    text = "Yêu cầu cấu hình",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        color = Color(0xAAFFFFFF),
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFF2a1a4a), RoundedCornerShape(6.dp))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text("Tối thiểu", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF), fontSize = 10.sp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Yêu cầu cấu hình",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = Color(0xAAFFFFFF),
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp
+                        ),
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(Color(0x22FFFFFF))
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0x14FFFFFF), RoundedCornerShape(8.dp))
+                                    .border(BorderStroke(1.dp, Color(0x33FFFFFF)), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                            ) {
+                                Text("Tối thiểu", style = MaterialTheme.typography.labelSmall.copy(color = Color(0x99FFFFFF), fontSize = 11.sp))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text("6GB RAM", style = MaterialTheme.typography.titleSmall.copy(color = Color.White, fontWeight = FontWeight.Bold))
+                            Text("Snap 7 Gen 1", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                         }
-                        Spacer(Modifier.height(6.dp))
-                        Text("6GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
-                        Text("Snapdragon 7 Gen 1", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
-                    }
-                    Spacer(Modifier.width(32.dp))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFF3a2060), RoundedCornerShape(6.dp))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text("Đề xuất", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFA78BFA), fontSize = 10.sp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0x2A7C3AED), RoundedCornerShape(8.dp))
+                                    .border(BorderStroke(1.dp, Color(0x667C3AED)), RoundedCornerShape(8.dp))
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                            ) {
+                                Text("Đề xuất", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFC4B5FD), fontSize = 11.sp))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text("12GB RAM", style = MaterialTheme.typography.titleSmall.copy(color = Color.White, fontWeight = FontWeight.Bold))
+                            Text("Snap 8 Gen 3", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                         }
-                        Spacer(Modifier.height(6.dp))
-                        Text("12GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
-                        Text("Snapdragon 8 Gen 3", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                     }
                 }
             }
@@ -498,13 +508,13 @@ private fun ModernCard(
     content: @Composable () -> Unit
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(0.85f),
-        shape = RoundedCornerShape(16.dp),
-        color = Color(0xFF1e1e30),
-        tonalElevation = 4.dp,
-        shadowElevation = 8.dp,
+        modifier = Modifier.fillMaxWidth(0.9f),
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0x1FFFFFFF),
+        border = BorderStroke(1.dp, Color(0x2EFFFFFF)),
+        shadowElevation = 0.dp,
     ) {
-        Box(modifier = Modifier.padding(18.dp)) { content() }
+        Box(modifier = Modifier.padding(20.dp)) { content() }
     }
 }
 
@@ -515,9 +525,9 @@ private fun MiniToolButton(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = Color(0xFF1e1e30),
-        tonalElevation = 2.dp,
+        shape = RoundedCornerShape(16.dp),
+        color = Color(0x1FFFFFFF),
+        border = BorderStroke(1.dp, Color(0x2EFFFFFF)),
         onClick = onClick
     ) {
         Column(
