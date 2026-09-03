@@ -18,10 +18,7 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,11 +38,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,9 +61,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -77,7 +69,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movtery.zalithlauncher.R
@@ -86,7 +77,6 @@ import com.movtery.zalithlauncher.game.account.AccountType
 import com.movtery.zalithlauncher.game.account.localLogin
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
-import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
@@ -140,8 +130,6 @@ private fun DinoHomepage(
     var showPass by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
 
-    val context = LocalContext.current
-
     val targetVersion = remember(versions) {
         versions.firstOrNull { v ->
             val name = v.getVersionName()
@@ -189,59 +177,57 @@ private fun DinoHomepage(
         ) {
             Spacer(Modifier.height(8.dp))
 
-            Image(
-                painter = painterResource(R.drawable.dino_isekai_icon),
-                contentDescription = "Dino Isekai",
-                modifier = Modifier.size(72.dp)
-            )
-
-            Text(
-                text = "DINO ISEKAI",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    letterSpacing = 4.sp,
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ChipBadge("Forge 1.20.1", Color(0xFFFACC15), Color(0xFFFACC15))
-                ChipBadge("Fantasy", Color(0xFFA78BFA), Color(0xFFA78BFA))
-                ChipBadge("Survival", Color(0xFF34D399), Color(0xFF34D399))
-                ChipBadge("Realistic", Color(0xFF60A5FA), Color(0xFF60A5FA))
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            GlassCard(width = 320.dp) {
-                Text(
-                    text = "Forge 1.20.1",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold, color = Color.White
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+            GlassCard {
+                Image(
+                    painter = painterResource(R.drawable.dino_isekai_title),
+                    contentDescription = "Dino Isekai",
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(110.dp)
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "Trạng thái: Sẵn sàng",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = Color(0xFF34D399)
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ChipBadge("Forge 1.20.1", Color(0xFFFACC15), Color(0xFFFACC15))
+                    Spacer(Modifier.width(8.dp))
+                    ChipBadge("Fantasy", Color(0xFFA78BFA), Color(0xFFA78BFA))
+                    Spacer(Modifier.width(8.dp))
+                    ChipBadge("Survival", Color(0xFF34D399), Color(0xFF34D399))
+                    Spacer(Modifier.width(8.dp))
+                    ChipBadge("Realistic", Color(0xFF60A5FA), Color(0xFF60A5FA))
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color(0xFF34D399))
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Online — Forge 1.20.1",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold, color = Color.White
+                        )
+                    )
+                }
             }
 
             Spacer(Modifier.height(8.dp))
 
-            GlassCard(width = 320.dp) {
+            GlassCard() {
                 Text(
                     text = "Yêu cầu cấu hình",
                     style = MaterialTheme.typography.labelSmall.copy(
@@ -274,7 +260,7 @@ private fun DinoHomepage(
 
             Spacer(Modifier.height(16.dp))
 
-            GlassCard(width = 320.dp) {
+            GlassCard() {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -313,7 +299,7 @@ private fun DinoHomepage(
 
             Spacer(Modifier.height(8.dp))
 
-            GlassCard(width = 320.dp) {
+            GlassCard() {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -503,7 +489,6 @@ private fun ChipBadge(text: String, color: Color, borderColor: Color) {
 
 @Composable
 private fun GlassCard(
-    width: Dp = 320.dp,
     content: @Composable () -> Unit
 ) {
     Surface(
