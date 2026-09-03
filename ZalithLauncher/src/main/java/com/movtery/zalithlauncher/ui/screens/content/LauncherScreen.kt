@@ -457,7 +457,7 @@ private fun DinoHomepage(
             Spacer(Modifier.height(28.dp))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MiniToolButton(icon = R.drawable.dino_ic_settings, label = "Cài đặt") {
@@ -537,14 +537,14 @@ private fun MiniToolButton(
         onClick = onClick
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = label,
                 tint = Color(0xFFA78BFA),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(22.dp)
             )
             Spacer(Modifier.height(4.dp))
             Text(
