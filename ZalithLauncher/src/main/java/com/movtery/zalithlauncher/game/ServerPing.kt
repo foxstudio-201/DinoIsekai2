@@ -5,8 +5,6 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.io.InputStream
-import java.io.OutputStream
 import java.net.Socket
 import java.net.SocketTimeoutException
 
@@ -21,7 +19,7 @@ data class PingResult(
 )
 
 object ServerPing {
-    suspend fun ping(host: String, port: Int, timeoutMs: Long = 5000): PingResult = withContext(Dispatchers.IO) {
+    suspend fun ping(host: String, port: Int, timeoutMs: Long = 8000): PingResult = withContext(Dispatchers.IO) {
         var socket: Socket? = null
         try {
             socket = Socket()
@@ -30,7 +28,6 @@ object ServerPing {
             socket.connect(java.net.InetSocketAddress(host, port), timeoutMs.toInt())
             val input = DataInputStream(socket.getInputStream())
             val output = DataOutputStream(socket.getOutputStream())
-            val pingSent = System.currentTimeMillis()
 
             // Handshake packet: protocol -1, host, port, next state 1
             val handshake = ByteArrayOutputStream()
@@ -54,25 +51,29 @@ object ServerPing {
             // Read response: varint len, then packet
             val statusJson = readStatusResponse(input) ?: return@withContext PingResult(online = false, error = "no status response")
 
-            // Send ping: packet id 0x01 + 8-byte payload
-            val pingPacket = ByteArrayOutputStream()
-            val pp = DataOutputStream(pingPacket)
-            writeVarInt(pp, 0x01)
-            pp.writeLong(pingSent)
-            pp.flush()
-            writePacket(output, pingPacket.toByteArray())
-            output.flush()
-
-            // Read pong
-            val responseLen = readVarInt(input) ?: return@withContext PingResult(online = false, error = "no pong")
-            if (responseLen < 0 || responseLen > 65535) return@withContext PingResult(online = false, error = "bad pong len")
-            val payload = ByteArray(responseLen)
-            input.readFully(payload)
-            val latency = System.currentTimeMillis() - pingSent
-
             val players = extractJsonInt(statusJson, "online")
             val maxPlayers = extractJsonInt(statusJson, "max")
             val version = extractJsonString(statusJson, "version", "name")
+
+            // Send ping packet to measure latency — if this fails we're still online
+            var latency = 0L
+            try {
+                val pingSent = System.currentTimeMillis()
+                val pingPacket = ByteArrayOutputStream()
+                val pp = DataOutputStream(pingPacket)
+                writeVarInt(pp, 0x01)
+                pp.writeLong(pingSent)
+                pp.flush()
+                writePacket(output, pingPacket.toByteArray())
+                output.flush()
+
+                val responseLen = readVarInt(input)
+                if (responseLen != null && responseLen in 0..65535) {
+                    val payload = ByteArray(responseLen)
+                    input.readFully(payload)
+                    latency = System.currentTimeMillis() - pingSent
+                }
+            } catch (_: Exception) { latency = 0L }
 
             return@withContext PingResult(
                 online = true,
