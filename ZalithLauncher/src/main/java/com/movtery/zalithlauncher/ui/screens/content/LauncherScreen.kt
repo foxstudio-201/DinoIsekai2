@@ -174,8 +174,9 @@ private fun DinoHomepage(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.weight(1f))
 
             Image(
                 painter = painterResource(R.drawable.dino_isekai_title),
@@ -444,7 +445,7 @@ private fun DinoHomepage(
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.weight(1f))
         }
     }
 }
