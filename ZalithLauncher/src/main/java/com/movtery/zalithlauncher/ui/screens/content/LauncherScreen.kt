@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -173,61 +174,32 @@ private fun DinoHomepage(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
 
-            GlassCard {
-                Image(
-                    painter = painterResource(R.drawable.dino_isekai_title),
-                    contentDescription = "Dino Isekai",
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
-                        .aspectRatio(2.87f)
-                )
+            Image(
+                painter = painterResource(R.drawable.dino_isekai_title),
+                contentDescription = "Dino Isekai",
+                modifier = Modifier
+                    .fillMaxWidth(0.75f)
+                    .aspectRatio(2.87f)
+            )
 
-                Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ChipBadge("Forge 1.20.1", Color(0xFFFACC15), Color(0xFFFACC15))
-                    Spacer(Modifier.width(8.dp))
-                    ChipBadge("Fantasy", Color(0xFFA78BFA), Color(0xFFA78BFA))
-                    Spacer(Modifier.width(8.dp))
-                    ChipBadge("Survival", Color(0xFF34D399), Color(0xFF34D399))
-                    Spacer(Modifier.width(8.dp))
-                    ChipBadge("Realistic", Color(0xFF60A5FA), Color(0xFF60A5FA))
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(Color(0xFF34D399))
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Online — Forge 1.20.1",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold, color = Color.White
-                        )
-                    )
-                }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ChipBadge("Forge 1.20.1", Color(0xFFFACC15), Color(0xFFFACC15))
+                ChipBadge("Fantasy", Color(0xFFA78BFA), Color(0xFFA78BFA))
+                ChipBadge("Survival", Color(0xFF34D399), Color(0xFF34D399))
+                ChipBadge("Realistic", Color(0xFF60A5FA), Color(0xFF60A5FA))
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(24.dp))
 
-            GlassCard() {
+            ModernCard {
                 Text(
                     text = "Yêu cầu cấu hình",
                     style = MaterialTheme.typography.labelSmall.copy(
@@ -238,57 +210,74 @@ private fun DinoHomepage(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Tối thiểu", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
-                        Text("4GB RAM", style = MaterialTheme.typography.bodySmall.copy(color = Color.White, fontWeight = FontWeight.Bold))
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF2a1a4a), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text("Tối thiểu", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF), fontSize = 10.sp))
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text("4GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
                         Text("Intel HD 500+", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                     }
-                    Spacer(Modifier.width(24.dp))
+                    Spacer(Modifier.width(32.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Đề xuất", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFA78BFA)))
-                        Text("12GB RAM", style = MaterialTheme.typography.bodySmall.copy(color = Color.White, fontWeight = FontWeight.Bold))
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFF3a2060), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text("Đề xuất", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xFFA78BFA), fontSize = 10.sp))
+                        }
+                        Spacer(Modifier.height(6.dp))
+                        Text("12GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
                         Text("RTX 2060+", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                     }
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
-            GlassCard() {
+            ModernCard {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_person_outlined),
-                        contentDescription = null,
-                        tint = Color(0xAAFFFFFF),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF3a2060)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_person_outlined),
+                            contentDescription = null,
+                            tint = Color(0xFFA78BFA),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
                     OutlinedTextField(
                         value = username,
                         onValueChange = { v ->
-                            if (v.length <= 16) {
-                                username = v
-                                errorMsg = null
-                            }
+                            if (v.length <= 16) { username = v; errorMsg = null }
                         },
-                        placeholder = {
-                            Text("Tên người chơi...", color = Color(0x55FFFFFF))
-                        },
+                        placeholder = { Text("Tên người chơi", color = Color(0x55FFFFFF)) },
                         singleLine = true,
                         textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0x66FFFFFF),
+                            focusedBorderColor = Color(0xFFA78BFA),
                             unfocusedBorderColor = Color(0x33FFFFFF),
-                            cursorColor = Color.White,
+                            cursorColor = Color(0xFFA78BFA),
                         ),
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -297,37 +286,42 @@ private fun DinoHomepage(
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
-            GlassCard() {
+            ModernCard {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_visibility_outlined),
-                        contentDescription = null,
-                        tint = Color(0xAAFFFFFF),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF3a2060)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(if (showPass) R.drawable.ic_visibility_off_outlined else R.drawable.ic_visibility_outlined),
+                            contentDescription = null,
+                            tint = Color(0xFFA78BFA),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it; errorMsg = null },
-                        placeholder = { Text("Mật khẩu...", color = Color(0x55FFFFFF)) },
+                        placeholder = { Text("Mật khẩu", color = Color(0x55FFFFFF)) },
                         singleLine = true,
                         visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
                         textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0x66FFFFFF),
+                            focusedBorderColor = Color(0xFFA78BFA),
                             unfocusedBorderColor = Color(0x33FFFFFF),
-                            cursorColor = Color.White,
+                            cursorColor = Color(0xFFA78BFA),
                         ),
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                         shape = RoundedCornerShape(12.dp),
                     )
                     Spacer(Modifier.width(4.dp))
@@ -353,108 +347,67 @@ private fun DinoHomepage(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
 
             Surface(
                 modifier = Modifier
                     .scale(playScale)
-                    .fillMaxWidth(0.75f)
+                    .fillMaxWidth(0.8f)
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, Color(0x55FFFFFF)),
-                color = Color(0x4D000000),
+                color = Color(0xFF7C3AED),
                 onClick = {
-                    if (username.isBlank()) {
-                        errorMsg = "Nhập tên người chơi!"
-                        return@Surface
-                    }
-                    if (password.isBlank()) {
-                        errorMsg = "Nhập mật khẩu!"
-                        return@Surface
-                    }
-                    if (username.length < 3 || username.length > 16) {
-                        errorMsg = "Tên 3-16 ký tự"
-                        return@Surface
-                    }
-                    if (!username.matches(Regex("^[a-zA-Z0-9_]+$"))) {
-                        errorMsg = "Chỉ dùng a-z, 0-9, _"
-                        return@Surface
-                    }
+                    if (username.isBlank()) { errorMsg = "Nhập tên người chơi!"; return@Surface }
+                    if (password.isBlank()) { errorMsg = "Nhập mật khẩu!"; return@Surface }
+                    if (username.length < 3 || username.length > 16) { errorMsg = "Tên 3-16 ký tự"; return@Surface }
+                    if (!username.matches(Regex("^[a-zA-Z0-9_]+$"))) { errorMsg = "Chỉ dùng a-z, 0-9, _"; return@Surface }
                     errorMsg = null
                     val existing = accounts.find { it.username == username && it.accountType == AccountType.LOCAL.tag }
-                    if (existing != null) {
-                        AccountsManager.setCurrentAccount(existing)
-                    } else {
-                        localLogin(username, null)
-                    }
+                    if (existing != null) AccountsManager.setCurrentAccount(existing)
+                    else localLogin(username, null)
                     val ver = targetVersion ?: currentVersion
-                    if (ver != null && ver.isValid()) {
-                        onLaunchGame(ver)
-                    } else {
-                        errorMsg = "Chưa có phiên bản game. Vào Download để tải 1.20.1 Forge."
-                    }
+                    if (ver != null && ver.isValid()) onLaunchGame(ver)
+                    else errorMsg = "Chưa có phiên bản game"
                 },
                 interactionSource = boxInteraction,
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "PLAY",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                letterSpacing = 4.sp
-                            )
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "PLAY",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold, color = Color.White, letterSpacing = 4.sp
                         )
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                MiniToolButton(icon = R.drawable.ic_settings_filled, label = "Cài đặt") {
+                    backStackViewModel.mainScreen.removeAndNavigateTo(
+                        remove = NestedNavKey.Settings::class,
+                        screenKey = NestedNavKey.Settings()
+                    )
+                }
+                MiniToolButton(icon = R.drawable.ic_folder_filled, label = "Quản lý") {
+                    backStackViewModel.mainScreen.removeAndNavigateTo(
+                        remove = NestedNavKey.VersionSettings::class,
+                        screenKey = NormalNavKey.VersionsManager
+                    )
+                }
+                MiniToolButton(icon = R.drawable.ic_chat_info, label = "Log") {
+                    currentVersion?.let { v ->
+                        val logFile = VersionsManager.getLatestLog(v)
+                        if (logFile.exists()) onNavigateToLog(logFile.absolutePath)
                     }
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MiniToolButton(
-                    icon = R.drawable.ic_settings_filled,
-                    label = "Cài đặt",
-                    onClick = {
-                        backStackViewModel.mainScreen.removeAndNavigateTo(
-                            remove = NestedNavKey.Settings::class,
-                            screenKey = NestedNavKey.Settings()
-                        )
-                    }
-                )
-                MiniToolButton(
-                    icon = R.drawable.ic_folder_filled,
-                    label = "Quản lý",
-                    onClick = {
-                        backStackViewModel.mainScreen.removeAndNavigateTo(
-                            remove = NestedNavKey.VersionSettings::class,
-                            screenKey = NormalNavKey.VersionsManager
-                        )
-                    }
-                )
-                MiniToolButton(
-                    icon = R.drawable.ic_chat_info,
-                    label = "Log",
-                    onClick = {
-                        currentVersion?.let { v ->
-                            val logFile = VersionsManager.getLatestLog(v)
-                            if (logFile.exists()) onNavigateToLog(logFile.absolutePath)
-                        }
-                    }
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -463,14 +416,14 @@ private fun DinoHomepage(
 private fun ChipBadge(text: String, color: Color, borderColor: Color) {
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = color.copy(alpha = 0.15f),
-        border = BorderStroke(1.dp, borderColor.copy(alpha = 0.3f)),
+        color = color.copy(alpha = 0.12f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.3f)),
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
             style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = color
             )
         )
@@ -478,20 +431,17 @@ private fun ChipBadge(text: String, color: Color, borderColor: Color) {
 }
 
 @Composable
-private fun GlassCard(
+private fun ModernCard(
     content: @Composable () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(0.85f),
         shape = RoundedCornerShape(16.dp),
-        color = Color(0x33FFFFFF),
-        border = BorderStroke(1.dp, Color(0x1AFFFFFF)),
+        color = Color(0xFF1e1e30),
+        tonalElevation = 4.dp,
+        shadowElevation = 8.dp,
     ) {
-        Box(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            content()
-        }
+        Box(modifier = Modifier.padding(16.dp)) { content() }
     }
 }
 
@@ -502,26 +452,26 @@ private fun MiniToolButton(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = Color(0x33FFFFFF),
-        border = BorderStroke(1.dp, Color(0x1AFFFFFF)),
+        shape = RoundedCornerShape(14.dp),
+        color = Color(0xFF1e1e30),
+        tonalElevation = 2.dp,
         onClick = onClick
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = label,
-                tint = Color(0xCCFFFFFF),
-                modifier = Modifier.size(22.dp)
+                tint = Color(0xFFA78BFA),
+                modifier = Modifier.size(24.dp)
             )
+            Spacer(Modifier.height(4.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    color = Color(0xAAFFFFFF),
-                    fontSize = 10.sp
+                    color = Color(0xAAFFFFFF), fontSize = 10.sp
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
