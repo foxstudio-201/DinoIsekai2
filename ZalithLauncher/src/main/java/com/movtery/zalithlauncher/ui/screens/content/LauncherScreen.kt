@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movtery.zalithlauncher.R
+import com.movtery.zalithlauncher.game.ServerPing
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.AccountType
 import com.movtery.zalithlauncher.game.account.localLogin
@@ -130,6 +131,14 @@ private fun DinoHomepage(
     var password by remember { mutableStateOf("") }
     var showPass by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
+    var pingResult by remember { mutableStateOf<com.movtery.zalithlauncher.game.PingResult?>(null) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            pingResult = com.movtery.zalithlauncher.game.ServerPing.ping("160.250.134.97", 3026)
+            kotlinx.coroutines.delay(8000)
+        }
+    }
 
     val targetVersion = remember(versions) {
         versions.firstOrNull { v ->
@@ -208,31 +217,47 @@ private fun DinoHomepage(
                     modifier = Modifier
                         .size(12.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(Color(0xFF34D399))
+                        .background(
+                            if (pingResult?.online == true) Color(0xFF34D399)
+                            else Color(0xFFFF5252)
+                        )
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Online",
+                    text = when {
+                        pingResult == null -> "Đang ping..."
+                        pingResult?.online == true -> "Online"
+                        else -> "Offline"
+                    },
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF34D399)
+                        color = if (pingResult?.online == true) Color(0xFF34D399) else Color(0xFFFF5252)
                     )
                 )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = "· 1.20.1 Forge",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = Color(0xAAFFFFFF)
+                if (pingResult?.online == true) {
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "· 1.20.1 Forge",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = Color(0xAAFFFFFF)
+                        )
                     )
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = "0 ms",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF60A5FA)
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "${pingResult?.ping ?: 0} ms",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF60A5FA)
+                        )
                     )
-                )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "${pingResult?.players ?: 0}/${pingResult?.maxPlayers ?: 0}",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color(0xAAFFFFFF)
+                        )
+                    )
+                }
             }
 
             Spacer(Modifier.height(24.dp))
