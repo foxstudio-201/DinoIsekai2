@@ -45,9 +45,18 @@ suspend fun runJvmRetryRuntimes(
     postProgress: NoticeProgress? = null,
     start: () -> Unit = {}
 ): Unit = withContext(Dispatchers.Default) {
+    // 等待其他(游戏/服务)进程退出。有上限，避免某个残留进程导致永久卡死。
+    var waitedMs = 0L
     while (!isOnlyMainProcessesRunning(context = GlobalContext)) {
         Logger.info(TAG, "$logId Waiting for other processes stop...")
         delay(100L.milliseconds)
+        waitedMs += 100L
+        // 超过 3 秒仍未退出则强制结束后台进程
+        if (waitedMs >= 3000L) {
+            stopAllNonMainProcesses(GlobalContext)
+            Logger.info(TAG, "$logId Force-stopped background processes after ${waitedMs}ms waiting.")
+            break
+        }
     }
 
     start()
