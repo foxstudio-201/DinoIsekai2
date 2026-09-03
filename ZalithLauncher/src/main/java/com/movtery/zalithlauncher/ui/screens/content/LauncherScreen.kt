@@ -510,11 +510,11 @@ private fun ModernCard(
     Surface(
         modifier = Modifier.fillMaxWidth(0.9f),
         shape = RoundedCornerShape(20.dp),
-        color = Color(0x1FFFFFFF),
-        border = BorderStroke(1.dp, Color(0x2EFFFFFF)),
-        shadowElevation = 0.dp,
+        color = Color(0xFF1e1e30),
+        tonalElevation = 4.dp,
+        shadowElevation = 8.dp,
     ) {
-        Box(modifier = Modifier.padding(20.dp)) { content() }
+        Box(modifier = Modifier.padding(18.dp)) { content() }
     }
 }
 
@@ -525,9 +525,9 @@ private fun MiniToolButton(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color(0x1FFFFFFF),
-        border = BorderStroke(1.dp, Color(0x2EFFFFFF)),
+        shape = RoundedCornerShape(14.dp),
+        color = Color(0xFF1e1e30),
+        tonalElevation = 2.dp,
         onClick = onClick
     ) {
         Column(
