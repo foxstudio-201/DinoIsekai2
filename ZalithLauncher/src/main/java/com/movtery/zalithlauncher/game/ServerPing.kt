@@ -5,6 +5,8 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.Socket
 import java.net.SocketTimeoutException
 
@@ -24,50 +26,53 @@ object ServerPing {
         try {
             socket = Socket()
             socket.soTimeout = timeoutMs.toInt()
-            val start = System.currentTimeMillis()
+            socket.tcpNoDelay = true
             socket.connect(java.net.InetSocketAddress(host, port), timeoutMs.toInt())
-            val `in` = DataInputStream(socket.getInputStream())
-            val out = DataOutputStream(socket.getOutputStream())
+            val input = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
+            val pingSent = System.currentTimeMillis()
 
-            writeVarInt(out, 0x00)
-            writeVarInt(out, -1)
-            writeString(out, host)
-            out.writeShort(port)
-            writeVarInt(out, 1)
-            flushPacket(out)
+            // Handshake packet: protocol -1, host, port, next state 1
+            val handshake = ByteArrayOutputStream()
+            val hs = DataOutputStream(handshake)
+            writeVarInt(hs, 0x00)
+            writeVarInt(hs, -1)
+            writeString(hs, host)
+            hs.writeShort(port)
+            writeVarInt(hs, 1)
+            hs.flush()
+            writePacket(output, handshake.toByteArray())
 
-            writeVarInt(out, 0x00)
-            flushPacket(out)
+            // Status request packet
+            val request = ByteArrayOutputStream()
+            val rq = DataOutputStream(request)
+            writeVarInt(rq, 0x00)
+            rq.flush()
+            writePacket(output, request.toByteArray())
+            output.flush()
 
-            val len = readVarInt(`in`)
-            if (len == null) {
-                return@withContext PingResult(online = false, error = "empty response")
-            }
-            val packetId = readVarInt(`in`)
-            if (packetId != 0x00) {
-                return@withContext PingResult(online = false, error = "unexpected packet")
-            }
-            val jsonLen = readVarInt(`in`) ?: return@withContext PingResult(online = false, error = "no json")
-            val jsonBytes = ByteArray(jsonLen)
-            `in`.readFully(jsonBytes)
-            val json = String(jsonBytes, Charsets.UTF_8)
+            // Read response: varint len, then packet
+            val statusJson = readStatusResponse(input) ?: return@withContext PingResult(online = false, error = "no status response")
 
-            val pingTime = System.currentTimeMillis()
-            writeVarInt(out, 0x01)
-            out.writeLong(pingTime)
-            flushPacket(out)
+            // Send ping: packet id 0x01 + 8-byte payload
+            val pingPacket = ByteArrayOutputStream()
+            val pp = DataOutputStream(pingPacket)
+            writeVarInt(pp, 0x01)
+            pp.writeLong(pingSent)
+            pp.flush()
+            writePacket(output, pingPacket.toByteArray())
+            output.flush()
 
-            val pongLen = readVarInt(`in`)
-            if (pongLen == null) {
-                return@withContext PingResult(online = false, error = "no pong")
-            }
-            val pongId = readVarInt(`in`)
-            val pongTime = `in`.readLong()
-            val latency = System.currentTimeMillis() - pingTime
+            // Read pong
+            val responseLen = readVarInt(input) ?: return@withContext PingResult(online = false, error = "no pong")
+            if (responseLen < 0 || responseLen > 65535) return@withContext PingResult(online = false, error = "bad pong len")
+            val payload = ByteArray(responseLen)
+            input.readFully(payload)
+            val latency = System.currentTimeMillis() - pingSent
 
-            val players = extractInt(json, "online")
-            val maxPlayers = extractInt(json, "max")
-            val version = extractString(json, "version", "name")
+            val players = extractJsonInt(statusJson, "online")
+            val maxPlayers = extractJsonInt(statusJson, "max")
+            val version = extractJsonString(statusJson, "version", "name")
 
             return@withContext PingResult(
                 online = true,
@@ -85,6 +90,26 @@ object ServerPing {
         }
     }
 
+    private fun readStatusResponse(input: DataInputStream): String? {
+        val responseLen = readVarInt(input) ?: return null
+        if (responseLen < 0 || responseLen > 1048576) return null
+        val payload = ByteArray(responseLen)
+        input.readFully(payload)
+        val in2 = DataInputStream(payload.inputStream())
+        val packetId = readVarInt(in2) ?: return null
+        if (packetId != 0x00) return null
+        val jsonLen = readVarInt(in2) ?: return null
+        if (jsonLen < 0 || jsonLen > 1048576) return null
+        val jsonBytes = ByteArray(jsonLen)
+        in2.readFully(jsonBytes)
+        return String(jsonBytes, Charsets.UTF_8)
+    }
+
+    private fun writePacket(output: DataOutputStream, payload: ByteArray) {
+        writeVarInt(output, payload.size)
+        output.write(payload)
+    }
+
     private fun writeVarInt(out: DataOutputStream, value: Int) {
         var v = value
         while (true) {
@@ -97,11 +122,11 @@ object ServerPing {
         }
     }
 
-    private fun readVarInt(`in`: DataInputStream): Int? {
+    private fun readVarInt(input: DataInputStream): Int? {
         var result = 0
         var shift = 0
         while (shift <= 35) {
-            val b = `in`.readByte().toInt() and 0xFF
+            val b = input.readByte().toInt() and 0xFF
             result = result or ((b and 0x7F) shl shift)
             shift += 7
             if ((b and 0x80) == 0) return result
@@ -115,27 +140,18 @@ object ServerPing {
         out.write(bytes)
     }
 
-    private val packetBuf = ThreadLocal.withInitial { ByteArrayOutputStream() }
-    private fun flushPacket(out: DataOutputStream) {
-        out.flush()
-    }
-
-    private fun extractInt(json: String, vararg path: String): Int {
+    private fun extractJsonInt(json: String, key: String): Int {
         try {
-            var pos = 0
-            for (p in path) {
-                val idx = json.indexOf("\"$p\"", pos)
-                if (idx == -1) return 0
-                pos = idx + p.length + 2
-            }
-            val colon = json.indexOf(':', pos)
+            val idx = json.indexOf("\"$key\"")
+            if (idx == -1) return 0
+            val colon = json.indexOf(':', idx + key.length + 2)
             if (colon == -1) return 0
             val num = json.substring(colon + 1).trim().takeWhile { it.isDigit() || it == '-' }
             return num.toIntOrNull() ?: 0
         } catch (_: Exception) { return 0 }
     }
 
-    private fun extractString(json: String, obj: String, key: String): String {
+    private fun extractJsonString(json: String, obj: String, key: String): String {
         try {
             val objIdx = json.indexOf("\"$obj\"")
             if (objIdx == -1) return ""

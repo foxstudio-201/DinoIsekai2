@@ -322,7 +322,7 @@ private fun DinoHomepage(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_person_outlined),
+                            painter = painterResource(R.drawable.dino_ic_player),
                             contentDescription = null,
                             tint = Color(0xFFA78BFA),
                             modifier = Modifier.size(22.dp)
@@ -364,7 +364,7 @@ private fun DinoHomepage(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(if (showPass) R.drawable.ic_visibility_off_outlined else R.drawable.ic_visibility_outlined),
+                            painter = painterResource(if (showPass) R.drawable.dino_ic_eye_off else R.drawable.dino_ic_eye),
                             contentDescription = null,
                             tint = Color(0xFFA78BFA),
                             modifier = Modifier.size(22.dp)
@@ -390,8 +390,8 @@ private fun DinoHomepage(
                     Spacer(Modifier.width(4.dp))
                     IconButton(onClick = { showPass = !showPass }) {
                         Icon(
-                            painter = if (showPass) painterResource(R.drawable.ic_visibility_off_outlined)
-                                else painterResource(R.drawable.ic_visibility_outlined),
+                            painter = if (showPass) painterResource(R.drawable.dino_ic_eye_off)
+                                else painterResource(R.drawable.dino_ic_eye),
                             contentDescription = if (showPass) "Ẩn" else "Hiện",
                             tint = Color(0xAAFFFFFF),
                             modifier = Modifier.size(20.dp)
@@ -450,19 +450,19 @@ private fun DinoHomepage(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                MiniToolButton(icon = R.drawable.ic_settings_filled, label = "Cài đặt") {
+                MiniToolButton(icon = R.drawable.dino_ic_settings, label = "Cài đặt") {
                     backStackViewModel.mainScreen.removeAndNavigateTo(
                         remove = NestedNavKey.Settings::class,
                         screenKey = NestedNavKey.Settings()
                     )
                 }
-                MiniToolButton(icon = R.drawable.ic_folder_filled, label = "Quản lý") {
+                MiniToolButton(icon = R.drawable.dino_ic_versions, label = "Quản lý") {
                     backStackViewModel.mainScreen.removeAndNavigateTo(
                         remove = NestedNavKey.VersionSettings::class,
                         screenKey = NormalNavKey.VersionsManager
                     )
                 }
-                MiniToolButton(icon = R.drawable.ic_chat_info, label = "Log") {
+                MiniToolButton(icon = R.drawable.dino_ic_log, label = "Log") {
                     currentVersion?.let { v ->
                         val logFile = VersionsManager.getLatestLog(v)
                         if (logFile.exists()) onNavigateToLog(logFile.absolutePath)
