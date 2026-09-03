@@ -96,6 +96,20 @@ import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
 import kotlinx.coroutines.launch
 
 private const val FIXED_VERSION_NAME = "1.20.1-Forge"
+private const val DINO_SERVER_ADDRESS = "160.250.134.97:3026"
+
+/** Cấu hình auto-join server cho version cố định rồi trả về version đã cấu hình. */
+private fun prepareFixedVersion(version: Version): Version {
+    runCatching {
+        if (version.getVersionConfig().serverIp != DINO_SERVER_ADDRESS) {
+            version.getVersionConfig().serverIp = DINO_SERVER_ADDRESS
+            version.getVersionConfig().save()
+        }
+    }.onFailure { e ->
+        com.movtery.zalithlauncher.utils.logging.Logger.error("LauncherScreen", "Failed to set server IP", e)
+    }
+    return version
+}
 
 @Composable
 fun LauncherScreen(
@@ -516,7 +530,7 @@ private fun DinoHomepage(
                     }
                     val ver = VersionsManager.getVersion(FIXED_VERSION_NAME)
                     if (ver != null && ver.isValid()) {
-                        onLaunchGame(ver)
+                        onLaunchGame(prepareFixedVersion(ver))
                     } else {
                         errorMsg = null
                         installing = true
@@ -556,7 +570,7 @@ private fun DinoHomepage(
                                             val installed = VersionsManager.getVersion(installedName)
                                             if (installed != null && installed.isValid()) {
                                                 VersionsManager.saveVersion(installed)
-                                                onLaunchGame(installed)
+                                                onLaunchGame(prepareFixedVersion(installed))
                                             } else {
                                                 errorMsg = "Đã cài xong nhưng không mở được game"
                                             }
@@ -576,7 +590,7 @@ private fun DinoHomepage(
                                             val installed = VersionsManager.getVersion(FIXED_VERSION_NAME)
                                             if (installed != null && installed.isValid()) {
                                                 VersionsManager.saveVersion(installed)
-                                                onLaunchGame(installed)
+                                                onLaunchGame(prepareFixedVersion(installed))
                                             } else {
                                                 errorMsg = "Game đã tồn tại nhưng không mở được"
                                             }
