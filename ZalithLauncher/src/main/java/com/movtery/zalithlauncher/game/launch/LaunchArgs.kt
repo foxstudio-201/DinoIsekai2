@@ -104,14 +104,16 @@ class LaunchArgs(
                     }
                     is QuickPlay.Server -> {
                         argsList.addQuickPlayServer(
-                            address = quickPlay.serverAddress
+                            address = quickPlay.serverAddress,
+                            useQuickPlayMultiplayer = info.quickPlay.hasQuickPlaysSupport
                         )
                     }
                 }
             } else {
                 version.getServerIp()?.let { address ->
                     argsList.addQuickPlayServer(
-                        address = address
+                        address = address,
+                        useQuickPlayMultiplayer = info.quickPlay.hasQuickPlaysSupport
                     )
                 }
             }
@@ -121,7 +123,8 @@ class LaunchArgs(
     }
 
     private fun MutableList<String>.addQuickPlayServer(
-        address: String
+        address: String,
+        useQuickPlayMultiplayer: Boolean
     ) {
         runCatching {
             ServerAddress.parse(address)
@@ -131,10 +134,17 @@ class LaunchArgs(
             Logger.warning(TAG, msg, it)
         }.getOrNull()?.let { parsed ->
             val port = parsed.port.takeIf { it >= 0 } ?: ServerAddress.DEFAULT_PORT
-            val msg = "Auto-joining server ${parsed.getASCIIHost()}:$port"
-            LoggerBridge.append(msg)
-            Logger.info(TAG, msg)
-            addAll(listOf("--server", parsed.getASCIIHost(), "--port", port.toString()))
+            if (useQuickPlayMultiplayer) {
+                val msg = "Auto-joining server via quick play: ${parsed.getASCIIHost()}:$port"
+                LoggerBridge.append(msg)
+                Logger.info(TAG, msg)
+                addAll(listOf("--quickPlayMultiplayer", "${parsed.getASCIIHost()}:$port"))
+            } else {
+                val msg = "Auto-joining server ${parsed.getASCIIHost()}:$port"
+                LoggerBridge.append(msg)
+                Logger.info(TAG, msg)
+                addAll(listOf("--server", parsed.getASCIIHost(), "--port", port.toString()))
+            }
         }
     }
 
