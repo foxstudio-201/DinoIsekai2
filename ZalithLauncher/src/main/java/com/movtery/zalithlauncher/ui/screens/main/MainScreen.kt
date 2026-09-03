@@ -78,6 +78,7 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.coroutine.Task
 import com.movtery.zalithlauncher.coroutine.TaskSystem
 import com.movtery.zalithlauncher.game.version.installed.Version
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.path.URL_ORIGINAL_PROJECT
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.AndroidStringText
@@ -123,6 +124,8 @@ import com.movtery.zalithlauncher.viewmodel.LocalBackgroundViewModel
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
 import com.movtery.zalithlauncher.viewmodel.sendKeepScreen
 import com.movtery.zalithlauncher.viewmodel.sendToast
+
+private const val DINO_SERVER_ADDRESS = "160.250.134.97:3026"
 
 @Composable
 fun MainScreen(
@@ -533,9 +536,15 @@ private fun NavigationUI(
                         backStackViewModel = screenBackStackModel,
                         navigateToVersions = navigateToVersions,
                         onLaunchGame = { version ->
-                            eventViewModel.sendEvent(
-                                EventViewModel.Event.Launch.Game(version)
-                            )
+                            val ver = version ?: VersionsManager.currentVersion.value
+                            if (ver != null) {
+                                eventViewModel.sendEvent(
+                                    EventViewModel.Event.Launch.PlayServer(
+                                        version = ver,
+                                        address = DINO_SERVER_ADDRESS
+                                    )
+                                )
+                            }
                         },
                         onOpenLink = {
                             eventViewModel.sendEvent(EventViewModel.Event.OpenLink(it))
