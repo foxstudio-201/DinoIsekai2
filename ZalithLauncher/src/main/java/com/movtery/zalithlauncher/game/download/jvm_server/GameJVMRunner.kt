@@ -45,18 +45,21 @@ suspend fun runJvmRetryRuntimes(
     postProgress: NoticeProgress? = null,
     start: () -> Unit = {}
 ): Unit = withContext(Dispatchers.Default) {
-    // 等待其他(游戏/服务)进程退出。有上限，避免某个残留进程导致永久卡死。
+    // 主动结束可能残留的游戏/服务进程，避免 Forge 安装前被阻塞。
+    // 短等 2 秒（进程退出需要一点时间），无论结果都继续安装，杜绝永久卡死。
+    stopAllNonMainProcesses(GlobalContext)
     var waitedMs = 0L
-    while (!isOnlyMainProcessesRunning(context = GlobalContext)) {
-        Logger.info(TAG, "$logId Waiting for other processes stop...")
+    var logged = false
+    while (waitedMs < 2000L && !isOnlyMainProcessesRunning(context = GlobalContext)) {
+        if (!logged) {
+            Logger.info(TAG, "$logId Waiting for background processes to exit...")
+            logged = true
+        }
         delay(100L.milliseconds)
         waitedMs += 100L
-        // 超过 3 秒仍未退出则强制结束后台进程
-        if (waitedMs >= 3000L) {
-            stopAllNonMainProcesses(GlobalContext)
-            Logger.info(TAG, "$logId Force-stopped background processes after ${waitedMs}ms waiting.")
-            break
-        }
+    }
+    if (logged) {
+        Logger.info(TAG, "$logId Proceeding after ${waitedMs}ms wait.")
     }
 
     start()
