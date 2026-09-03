@@ -207,7 +207,7 @@ private fun DinoHomepage(
                 ChipBadge("Realistic", Color(0xFF60A5FA), Color(0xFF60A5FA))
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(28.dp))
 
             Row(
                 horizontalArrangement = Arrangement.Center,
@@ -260,7 +260,7 @@ private fun DinoHomepage(
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(28.dp))
 
             ModernCard {
                 Text(
@@ -307,7 +307,7 @@ private fun DinoHomepage(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             ModernCard {
                 Row(
@@ -349,7 +349,7 @@ private fun DinoHomepage(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
             ModernCard {
                 Row(
@@ -410,7 +410,7 @@ private fun DinoHomepage(
                 )
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
 
             Surface(
                 modifier = Modifier
@@ -444,7 +444,7 @@ private fun DinoHomepage(
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(28.dp))
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -504,7 +504,7 @@ private fun ModernCard(
         tonalElevation = 4.dp,
         shadowElevation = 8.dp,
     ) {
-        Box(modifier = Modifier.padding(16.dp)) { content() }
+        Box(modifier = Modifier.padding(18.dp)) { content() }
     }
 }
 
