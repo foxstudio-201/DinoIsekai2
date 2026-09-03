@@ -197,6 +197,43 @@ private fun DinoHomepage(
                 ChipBadge("Realistic", Color(0xFF60A5FA), Color(0xFF60A5FA))
             }
 
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color(0xFF34D399))
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Online",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF34D399)
+                    )
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = "· 1.20.1 Forge",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color(0xAAFFFFFF)
+                    )
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = "0 ms",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF60A5FA)
+                    )
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
 
             ModernCard {
