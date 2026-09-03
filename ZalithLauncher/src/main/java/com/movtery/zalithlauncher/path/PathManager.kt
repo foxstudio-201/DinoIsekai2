@@ -51,7 +51,6 @@ class PathManager {
         lateinit var DIR_NATIVE_LOGS: File
         lateinit var DIR_IMAGE_CACHE: File
         lateinit var DIR_CONTROL_LAYOUTS: File
-        lateinit var DIR_TERRACOTTA: File
         lateinit var DIR_STYLES: File
         lateinit var DIR_DRIVERS: File
 
@@ -59,7 +58,6 @@ class PathManager {
         lateinit var FILE_SETTINGS: File
         lateinit var FILE_MINECRAFT_VERSIONS: File
         lateinit var FILE_LAUNCHER_BACKGROUND: File
-        lateinit var FILE_TERRACOTTA_LOG: File
 
         fun refreshPaths(context: Context) {
             DIR_FILES_PRIVATE = context.filesDir
@@ -90,7 +88,6 @@ class PathManager {
             DIR_NATIVE_LOGS = File(DIR_LAUNCHER_LOGS, "native")
             DIR_IMAGE_CACHE = File(DIR_CACHE, "images")
             DIR_CONTROL_LAYOUTS = File(DIR_FILES_EXTERNAL, "control_layouts")
-            DIR_TERRACOTTA = File(DIR_FILES_PRIVATE, "net.burningtnt.terracotta")
             DIR_STYLES = File(DIR_FILES_PRIVATE, "special_styles")
             DIR_DRIVERS = File(DIR_GAME, "drivers")
 
@@ -98,7 +95,6 @@ class PathManager {
             FILE_SETTINGS = File(DIR_FILES_PRIVATE, "settings.json")
             FILE_MINECRAFT_VERSIONS = File(DIR_GAME, "minecraft_versions.json")
             FILE_LAUNCHER_BACKGROUND = File(DIR_BACKGROUND, "background01.file")
-            FILE_TERRACOTTA_LOG = File(DIR_FILES_EXTERNAL, "terracotta.log")
 
             createDirs()
             handleLegacy()
@@ -124,7 +120,6 @@ class PathManager {
             DIR_NATIVE_LOGS.mkdirs()
             DIR_IMAGE_CACHE.mkdirs()
             DIR_CONTROL_LAYOUTS.mkdirs()
-            DIR_TERRACOTTA.mkdirs()
             DIR_STYLES.mkdirs()
             DIR_DRIVERS.mkdirs()
         }

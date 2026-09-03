@@ -91,7 +91,6 @@ import com.movtery.zalithlauncher.game.renderer.renderers.KopperZinkRenderer
 import com.movtery.zalithlauncher.game.version.installed.PlayTimeRepository
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.setting.AllSettings
-import com.movtery.zalithlauncher.terracotta.TerracottaVPNService
 import com.movtery.zalithlauncher.ui.base.BaseAppCompatActivity
 import com.movtery.zalithlauncher.ui.base.ObserveFullScreenSetting
 import com.movtery.zalithlauncher.ui.components.rememberBoxSize
@@ -598,12 +597,6 @@ class VMActivity : BaseAppCompatActivity(), SurfaceTextureListener, SurfaceHolde
 
     private fun stopAllService() {
         stopService(Intent(this, GameService::class.java))
-        if (TerracottaVPNService.isRunning()) {
-            val vpnIntent = Intent(this, TerracottaVPNService::class.java).apply {
-                action = TerracottaVPNService.ACTION_STOP
-            }
-            startForegroundService(vpnIntent)
-        }
     }
 
     @SuppressLint("RestrictedApi")

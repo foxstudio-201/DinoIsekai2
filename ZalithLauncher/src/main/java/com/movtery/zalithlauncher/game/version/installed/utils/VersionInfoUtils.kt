@@ -61,8 +61,7 @@ fun parseJsonToVersionInfo(jsonFile: File): VersionInfo? {
             Logger.warning(TAG, "Failed to parse Quick Play", e)
             VersionInfo.QuickPlay(
                 hasQuickPlaysSupport = false,
-                isQuickPlaySingleplayer = false,
-                isQuickPlayMultiplayer = false
+                isQuickPlaySingleplayer = false
             )
         }
         val (versionId, loaderInfo) = detectMinecraftAndLoader(jsonObject)
@@ -79,7 +78,6 @@ fun parseJsonToVersionInfo(jsonFile: File): VersionInfo? {
 private fun ensureQuickPlay(versionJson: JsonObject): VersionInfo.QuickPlay {
     var hasQuickPlaysSupport = false
     var isQuickPlaySingleplayer = false
-    var isQuickPlayMultiplayer = false
 
     versionJson.getAsJsonObject("arguments")?.getAsJsonArray("game")?.forEach outerFor@{ element ->
         if (!element.isJsonObject) return@outerFor
@@ -91,13 +89,11 @@ private fun ensureQuickPlay(versionJson: JsonObject): VersionInfo.QuickPlay {
 
             hasQuickPlaysSupport = hasQuickPlaysSupport || features.get("has_quick_plays_support")?.asBoolean ?: false
             isQuickPlaySingleplayer = isQuickPlaySingleplayer || features.get("is_quick_play_singleplayer")?.asBoolean ?: false
-            isQuickPlayMultiplayer = isQuickPlayMultiplayer || features.get("is_quick_play_multiplayer")?.asBoolean ?: false
 
-            if (hasQuickPlaysSupport && isQuickPlaySingleplayer && isQuickPlayMultiplayer) {
+            if (hasQuickPlaysSupport && isQuickPlaySingleplayer) {
                 return@ensureQuickPlay VersionInfo.QuickPlay(
                     hasQuickPlaysSupport = true,
-                    isQuickPlaySingleplayer = true,
-                    isQuickPlayMultiplayer = true
+                    isQuickPlaySingleplayer = true
                 )
             }
         }
@@ -105,8 +101,7 @@ private fun ensureQuickPlay(versionJson: JsonObject): VersionInfo.QuickPlay {
 
     return VersionInfo.QuickPlay(
         hasQuickPlaysSupport = hasQuickPlaysSupport,
-        isQuickPlaySingleplayer = isQuickPlaySingleplayer,
-        isQuickPlayMultiplayer = isQuickPlayMultiplayer
+        isQuickPlaySingleplayer = isQuickPlaySingleplayer
     )
 }
 

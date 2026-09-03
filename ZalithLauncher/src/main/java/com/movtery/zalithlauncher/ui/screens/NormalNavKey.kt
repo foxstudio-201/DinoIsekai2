@@ -61,10 +61,6 @@ sealed interface NormalNavKey : TitledNavKey {
     ) : NormalNavKey {
         @Contextual override val title: AndroidStringText = androidText(R.string.page_title_select_files)
     }
-    /** 多人联机屏幕 */
-    @Serializable data object Multiplayer: NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.terracotta_terracotta)
-    }
     /** 内置文件管理器屏幕 */
     @Serializable data class BuiltInFileManager(
         val startPath: String? = null
@@ -143,14 +139,6 @@ sealed interface NormalNavKey : TitledNavKey {
         @Serializable data object ServerList : Versions {
             @Contextual override val title: AndroidStringText = androidText(R.string.servers_list)
         }
-    }
-
-    /** 下载游戏嵌套子屏幕 */
-    sealed interface DownloadGame : NormalNavKey {
-        /** 选择游戏版本屏幕 */
-        @Serializable data object SelectGameVersion : Versions
-        /** 选择附加内容屏幕 */
-        @Serializable data class Addons(val gameVersion: String) : Versions
     }
 
     /** 游戏统计屏幕 */

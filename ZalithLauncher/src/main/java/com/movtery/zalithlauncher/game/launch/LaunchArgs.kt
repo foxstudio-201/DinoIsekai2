@@ -104,16 +104,14 @@ class LaunchArgs(
                     }
                     is QuickPlay.Server -> {
                         argsList.addQuickPlayServer(
-                            address = quickPlay.serverAddress,
-                            quickPlay = info.quickPlay
+                            address = quickPlay.serverAddress
                         )
                     }
                 }
             } else {
                 version.getServerIp()?.let { address ->
                     argsList.addQuickPlayServer(
-                        address = address,
-                        quickPlay = info.quickPlay
+                        address = address
                     )
                 }
             }
@@ -123,8 +121,7 @@ class LaunchArgs(
     }
 
     private fun MutableList<String>.addQuickPlayServer(
-        address: String,
-        quickPlay: VersionInfo.QuickPlay
+        address: String
     ) {
         runCatching {
             ServerAddress.parse(address)
@@ -133,23 +130,8 @@ class LaunchArgs(
             LoggerBridge.append(msg)
             Logger.warning(TAG, msg, it)
         }.getOrNull()?.let { parsed ->
-            val args = if (quickPlay.isQuickPlayMultiplayer) {
-                val port = if (parsed.port < 0) {
-                    ServerAddress.DEFAULT_PORT
-                } else {
-                    parsed.port
-                }
-
-                listOf(
-                    "--quickPlayMultiplayer",
-                    "${parsed.getASCIIHost()}:$port"
-                )
-            } else {
-                val port = parsed.port.takeIf { it >= 0 } ?: ServerAddress.DEFAULT_PORT
-                listOf("--server", parsed.getASCIIHost(), "--port", port.toString())
-            }
-
-            addAll(args)
+            val port = parsed.port.takeIf { it >= 0 } ?: ServerAddress.DEFAULT_PORT
+            addAll(listOf("--server", parsed.getASCIIHost(), "--port", port.toString()))
         }
     }
 

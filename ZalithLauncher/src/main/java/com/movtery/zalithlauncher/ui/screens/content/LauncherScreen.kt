@@ -182,8 +182,8 @@ private fun DinoHomepage(
                     painter = painterResource(R.drawable.dino_isekai_title),
                     contentDescription = "Dino Isekai",
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(110.dp)
+                        .fillMaxWidth(0.85f)
+                        .aspectRatio(2.87f)
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -439,16 +439,6 @@ private fun DinoHomepage(
                         backStackViewModel.mainScreen.removeAndNavigateTo(
                             remove = NestedNavKey.VersionSettings::class,
                             screenKey = NormalNavKey.VersionsManager
-                        )
-                    }
-                )
-                MiniToolButton(
-                    icon = R.drawable.ic_download_2_filled,
-                    label = "Tải game",
-                    onClick = {
-                        backStackViewModel.mainScreen.removeAndNavigateTo(
-                            removes = backStackViewModel.clearBeforeNavKeys,
-                            screenKey = backStackViewModel.downloadScreen
                         )
                     }
                 )

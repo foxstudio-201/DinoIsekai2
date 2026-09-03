@@ -55,18 +55,4 @@ sealed interface NestedNavKey {
             backStack.addIfEmpty(NormalNavKey.Versions.OverView)
         }
     }
-    /** 下载屏幕 */
-    @Serializable class Download : BackStackNavKey<TitledNavKey>(
-        androidText(R.string.generic_download)
-    )
-
-    //下载嵌套子屏幕
-    /** 下载游戏屏幕 */
-    @Serializable class DownloadGame : BackStackNavKey<TitledNavKey>(
-        androidText(R.string.download_category_game)
-    ) {
-        init {
-            backStack.addIfEmpty(NormalNavKey.DownloadGame.SelectGameVersion)
-        }
-    }
 }

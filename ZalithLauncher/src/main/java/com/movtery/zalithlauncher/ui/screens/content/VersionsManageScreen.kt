@@ -366,9 +366,6 @@ fun VersionsManageScreen(
                 },
                 onVersionPinned = {
                     viewModel.resortVersions()
-                },
-                onInstall = {
-                    backScreenViewModel.navigateToDownload()
                 }
             )
 
@@ -517,7 +514,6 @@ private fun VersionsLayout(
     submitError: (ErrorViewModel.ThrowableMessage) -> Unit,
     onRefresh: () -> Unit,
     onVersionPinned: () -> Unit,
-    onInstall: () -> Unit,
 ) {
     val context = LocalContext.current
     val surfaceYOffset by swapAnimateDpAsState(
@@ -565,12 +561,6 @@ private fun VersionsLayout(
                             painter = painterResource(R.drawable.ic_refresh),
                             contentDescription = stringResource(R.string.generic_refresh),
                             text = stringResource(R.string.generic_refresh)
-                        )
-                        IconTextButton(
-                            onClick = onInstall,
-                            painter = painterResource(R.drawable.ic_download),
-                            contentDescription = stringResource(R.string.versions_manage_install_new),
-                            text = stringResource(R.string.versions_manage_install_new),
                         )
                         //版本分类
                         VersionCategoryItem(

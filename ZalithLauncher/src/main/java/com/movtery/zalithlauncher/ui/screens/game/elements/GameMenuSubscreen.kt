@@ -99,8 +99,6 @@ fun GameMenuSubscreen(
     onSwitchLog: () -> Unit,
     onOpenPerformanceFps: () -> Unit,
     onOpenPerformanceRam: () -> Unit,
-    enableTerracotta: Boolean,
-    onOpenTerracottaMenu: () -> Unit,
     onRefreshWindowSize: () -> Unit,
     onInputMethod: () -> Unit,
     onSendKeycode: () -> Unit,
@@ -188,8 +186,6 @@ fun GameMenuSubscreen(
                 onSwitchLog = onSwitchLog,
                 onOpenPerformanceFps = onOpenPerformanceFps,
                 onOpenPerformanceRam = onOpenPerformanceRam,
-                enableTerracotta = enableTerracotta,
-                onOpenTerracottaMenu = onOpenTerracottaMenu,
                 onRefreshWindowSize = onRefreshWindowSize,
                 onShowToast = onShowToast,
                 onStartRecording = onStartRecording
@@ -204,8 +200,6 @@ private fun GameActionContent(
     onSwitchLog: () -> Unit,
     onOpenPerformanceFps: () -> Unit,
     onOpenPerformanceRam: () -> Unit,
-    enableTerracotta: Boolean,
-    onOpenTerracottaMenu: () -> Unit,
     onRefreshWindowSize: () -> Unit,
     onShowToast: (AndroidStringText, Int) -> Unit,
     onStartRecording: () -> Unit = {},
@@ -261,24 +255,6 @@ private fun GameActionContent(
                 color = color,
                 contentColor = contentColor
             )
-        }
-
-        //如果开启多人联机，则展示这个按钮
-        if (enableTerracotta) {
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            //打开联机菜单
-            item {
-                MenuTextButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.terracotta_menu),
-                    onClick = onOpenTerracottaMenu,
-                    color = color,
-                    contentColor = contentColor,
-                )
-            }
         }
 
         item {

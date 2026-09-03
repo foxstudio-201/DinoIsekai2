@@ -95,7 +95,6 @@ import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
 import com.movtery.zalithlauncher.setting.enums.toAction
 import com.movtery.zalithlauncher.ui.androidText
-import com.movtery.zalithlauncher.terracotta.Terracotta
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.MenuState
 import com.movtery.zalithlauncher.ui.components.rememberBoxSize
@@ -121,8 +120,6 @@ import com.movtery.zalithlauncher.ui.screens.game.elements.ReplacementControlOpe
 import com.movtery.zalithlauncher.ui.screens.game.elements.ReplacementControlState
 import com.movtery.zalithlauncher.ui.screens.game.elements.SendKeycodeOperation
 import com.movtery.zalithlauncher.ui.screens.game.elements.SendKeycodeState
-import com.movtery.zalithlauncher.ui.screens.game.multiplayer.TerracottaOperation
-import com.movtery.zalithlauncher.ui.screens.game.multiplayer.rememberTerracottaViewModel
 import com.movtery.zalithlauncher.ui.screens.main.control_editor.ControlEditor
 import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.viewmodel.EditorViewModel
@@ -518,12 +515,6 @@ fun GameScreen(
     val isGrabbing = remember(cursorMode) {
         cursorMode == CURSOR_DISABLED
     }
-    val terracottaViewModel = rememberTerracottaViewModel(
-        keyTag = gameHandler.toString() + "_Terracotta",
-        gameHandler = gameHandler,
-        eventViewModel = eventViewModel,
-        getUserName = getAccountName
-    )
 
     LaunchedEffect(viewModel.isEditingLayout) {
         val state = viewModel.isEditingLayout
@@ -541,7 +532,6 @@ fun GameScreen(
         operation = viewModel.forceCloseState,
         onChange = { viewModel.forceCloseState = it },
         onForceClose = {
-            Terracotta.setWaiting(false)
             ZLNativeInvoker.jvmExit(0, false)
         },
         text = stringResource(R.string.game_menu_option_force_close_text)
@@ -556,13 +546,6 @@ fun GameScreen(
     PerformanceSettingsDialog(
         operation = viewModel.performanceSettingsState,
         onDismissRequest = { viewModel.performanceSettingsState = PerformanceSettingsOperation.None }
-    )
-
-    TerracottaOperation(
-        viewModel = terracottaViewModel,
-        onShowToast = { text, duration ->
-            eventViewModel.sendToast(text, duration)
-        }
     )
 
     // ── Recording launchers ───────────────────────────────────────────────────
@@ -748,8 +731,6 @@ fun GameScreen(
             onSwitchLog = { onLogStateChange(logState.next()) },
             onOpenPerformanceFps = { viewModel.performanceSettingsState = PerformanceSettingsOperation.Fps },
             onOpenPerformanceRam = { viewModel.performanceSettingsState = PerformanceSettingsOperation.Ram },
-            enableTerracotta = AllSettings.enableTerracotta.state,
-            onOpenTerracottaMenu = { terracottaViewModel.openMenu() },
             onRefreshWindowSize = { eventViewModel.sendEvent(EventViewModel.Event.Game.RefreshSize) },
             onInputMethod = {
                 eventViewModel.sendEvent(EventViewModel.Event.Game.SwitchIme(null))

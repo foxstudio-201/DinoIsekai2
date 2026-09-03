@@ -65,7 +65,6 @@ class VersionInfo(
     @Parcelize
     data class QuickPlay(
         val hasQuickPlaysSupport: Boolean,
-        val isQuickPlaySingleplayer: Boolean,
-        val isQuickPlayMultiplayer: Boolean
+        val isQuickPlaySingleplayer: Boolean
     ): Parcelable
 }
