@@ -478,6 +478,12 @@ private fun DinoHomepage(
                         if (logFile.exists()) onNavigateToLog(logFile.absolutePath)
                     }
                 }
+                MiniToolButton(icon = R.drawable.ic_videocam_filled, label = "Video") {
+                    backStackViewModel.mainScreen.removeAndNavigateTo(
+                        remove = NestedNavKey.Settings::class,
+                        screenKey = NormalNavKey.Recordings
+                    )
+                }
             }
 
             Spacer(Modifier.weight(1f))
