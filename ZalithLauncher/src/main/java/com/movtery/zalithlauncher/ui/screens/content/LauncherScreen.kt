@@ -288,8 +288,8 @@ private fun DinoHomepage(
                             Text("Tối thiểu", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF), fontSize = 10.sp))
                         }
                         Spacer(Modifier.height(6.dp))
-                        Text("4GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
-                        Text("Intel HD 500+", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
+                        Text("6GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
+                        Text("Snapdragon 7 Gen 1", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                     }
                     Spacer(Modifier.width(32.dp))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -302,7 +302,7 @@ private fun DinoHomepage(
                         }
                         Spacer(Modifier.height(6.dp))
                         Text("12GB RAM", style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.Bold))
-                        Text("RTX 2060+", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
+                        Text("Snapdragon 8 Gen 3", style = MaterialTheme.typography.labelSmall.copy(color = Color(0xAAFFFFFF)))
                     }
                 }
             }
