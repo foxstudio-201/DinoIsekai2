@@ -104,18 +104,14 @@ class LaunchArgs(
                     }
                     is QuickPlay.Server -> {
                         argsList.addQuickPlayServer(
-                            address = quickPlay.serverAddress,
-                            mcVersion = info.minecraftVersion,
-                            useQuickPlayMultiplayer = info.quickPlay.hasQuickPlaysSupport
+                            address = quickPlay.serverAddress
                         )
                     }
                 }
             } else {
                 version.getServerIp()?.let { address ->
                     argsList.addQuickPlayServer(
-                        address = address,
-                        mcVersion = info.minecraftVersion,
-                        useQuickPlayMultiplayer = info.quickPlay.hasQuickPlaysSupport
+                        address = address
                     )
                 }
             }
@@ -125,9 +121,7 @@ class LaunchArgs(
     }
 
     private fun MutableList<String>.addQuickPlayServer(
-        address: String,
-        mcVersion: String,
-        useQuickPlayMultiplayer: Boolean
+        address: String
     ) {
         runCatching {
             ServerAddress.parse(address)
@@ -137,20 +131,11 @@ class LaunchArgs(
             Logger.warning(TAG, msg, it)
         }.getOrNull()?.let { parsed ->
             val port = parsed.port.takeIf { it >= 0 } ?: ServerAddress.DEFAULT_PORT
-            // Minecraft 1.20+ hỗ trợ quick play multiplayer. Ưu tiên dùng nó cho bản >= 1.20
-            // giống cách launcher gốc tự-join server (Electron cũng làm vậy).
-            val isModern = !mcVersion.isLowerTo("1.20")
-            if (useQuickPlayMultiplayer || isModern) {
-                val msg = "Auto-joining server via quick play: ${parsed.getASCIIHost()}:$port"
-                LoggerBridge.append(msg)
-                Logger.info(TAG, msg)
-                addAll(listOf("--quickPlayMultiplayer", "${parsed.getASCIIHost()}:$port"))
-            } else {
-                val msg = "Auto-joining server ${parsed.getASCIIHost()}:$port"
-                LoggerBridge.append(msg)
-                Logger.info(TAG, msg)
-                addAll(listOf("--server", parsed.getASCIIHost(), "--port", port.toString()))
-            }
+            // 1.20.1 không hỗ trợ --quickPlayMultiplayer (chỉ 1.20.2+). Dùng legacy --server/--port.
+            val msg = "Auto-joining server ${parsed.getASCIIHost()}:$port"
+            LoggerBridge.append(msg)
+            Logger.info(TAG, msg)
+            addAll(listOf("--server", parsed.getASCIIHost(), "--port", port.toString()))
         }
     }
 
