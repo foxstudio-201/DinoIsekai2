@@ -92,8 +92,6 @@ import com.movtery.zalithlauncher.ui.base.BaseScreen
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.content.elements.TitleTaskFlowDialog
-import com.movtery.zalithlauncher.ui.screens.main.custom_home.MarkdownBlock
-import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.removeAndNavigateTo
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
 import kotlinx.coroutines.launch
@@ -103,13 +101,7 @@ private const val FIXED_VERSION_NAME = "1.20.1-Forge"
 @Composable
 fun LauncherScreen(
     backStackViewModel: ScreenBackStackViewModel,
-    navigateToVersions: (Version) -> Unit,
     onLaunchGame: (Version?) -> Unit,
-    onOpenLink: (String) -> Unit,
-    onHomePageEvent: (MarkdownBlock.Button.Event) -> Unit,
-    onNavigateToStats: () -> Unit = {},
-    onNavigateToPlayTimeStats: () -> Unit = {},
-    onNavigateToLog: (String) -> Unit = {},
 ) {
     BaseScreen(
         screenKey = NormalNavKey.LauncherMain,
@@ -118,10 +110,7 @@ fun LauncherScreen(
         DinoHomepage(
             isVisible = isVisible,
             backStackViewModel = backStackViewModel,
-            navigateToVersions = navigateToVersions,
             onLaunchGame = onLaunchGame,
-            onNavigateToLog = onNavigateToLog,
-            onOpenLink = onOpenLink,
         )
     }
 }
@@ -130,10 +119,7 @@ fun LauncherScreen(
 private fun DinoHomepage(
     isVisible: Boolean,
     backStackViewModel: ScreenBackStackViewModel,
-    navigateToVersions: (Version) -> Unit,
     onLaunchGame: (Version?) -> Unit,
-    onNavigateToLog: (String) -> Unit,
-    onOpenLink: (String) -> Unit,
 ) {
     val accounts by AccountsManager.accountsFlow.collectAsState()
     val accCurrent by AccountsManager.currentAccountFlow.collectAsState()
@@ -620,18 +606,6 @@ private fun DinoHomepage(
                         remove = NestedNavKey.Settings::class,
                         screenKey = NestedNavKey.Settings()
                     )
-                }
-                MiniToolButton(icon = R.drawable.dino_ic_versions, label = "Quản lý") {
-                    backStackViewModel.mainScreen.removeAndNavigateTo(
-                        remove = NestedNavKey.VersionSettings::class,
-                        screenKey = NormalNavKey.VersionsManager
-                    )
-                }
-                MiniToolButton(icon = R.drawable.dino_ic_log, label = "Log") {
-                    currentVersion?.let { v ->
-                        val logFile = VersionsManager.getLatestLog(v)
-                        if (logFile.exists()) onNavigateToLog(logFile.absolutePath)
-                    }
                 }
                 MiniToolButton(icon = R.drawable.ic_videocam_filled, label = "Video") {
                     backStackViewModel.mainScreen.removeAndNavigateTo(

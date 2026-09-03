@@ -19,18 +19,11 @@
 package com.movtery.zalithlauncher.ui.screens.content.elements
 
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,65 +38,41 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.addons.modloader.ModLoader
 import com.movtery.zalithlauncher.game.path.GamePath
 import com.movtery.zalithlauncher.game.path.GamePathManager
-import com.movtery.zalithlauncher.game.version.installed.PlayTimeRepository
-import com.movtery.zalithlauncher.game.version.installed.Version
-import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.game.version.installed.cleanup.CleanFailedException
 import com.movtery.zalithlauncher.game.version.installed.cleanup.GameAssetCleaner
 import com.movtery.zalithlauncher.ui.androidText
-import com.movtery.zalithlauncher.ui.components.LittleTextLabel
 import com.movtery.zalithlauncher.ui.components.MarqueeText
 import com.movtery.zalithlauncher.ui.components.SimpleAlertDialog
-import com.movtery.zalithlauncher.ui.components.SimpleCheckEditDialog
 import com.movtery.zalithlauncher.ui.components.SimpleEditDialog
-import com.movtery.zalithlauncher.ui.components.SimpleTaskDialog
 import com.movtery.zalithlauncher.ui.components.TextRailItem
 import com.movtery.zalithlauncher.ui.components.fadeEdge
 import com.movtery.zalithlauncher.ui.components.verticalScrollWithBar
-import com.movtery.zalithlauncher.ui.theme.itemColor
-import com.movtery.zalithlauncher.ui.theme.onItemColor
-import com.movtery.zalithlauncher.utils.animation.getAnimateTween
-import com.movtery.zalithlauncher.utils.logging.Logger
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
 import com.movtery.zalithlauncher.utils.string.isNotEmptyOrBlank
 import com.movtery.zalithlauncher.viewmodel.ErrorViewModel
-import kotlinx.coroutines.Dispatchers
 
 private const val TAG = "VersionsManageElements"
 
@@ -113,15 +82,6 @@ sealed interface GamePathOperation {
     data class AddNewPath(val path: String): GamePathOperation
     data class RenamePath(val item: GamePath): GamePathOperation
     data class DeletePath(val item: GamePath): GamePathOperation
-}
-
-sealed interface VersionsOperation {
-    data object None: VersionsOperation
-    data class Rename(val version: Version): VersionsOperation
-    data class Copy(val version: Version): VersionsOperation
-    data class Delete(val version: Version, val text: String? = null): VersionsOperation
-    data class InvalidDelete(val version: Version): VersionsOperation
-    data class RunTask(val title: Int, val task: suspend () -> Unit): VersionsOperation
 }
 
 sealed interface CleanupOperation {
@@ -375,212 +335,6 @@ private fun NameEditPathDialog(
 }
 
 @Composable
-fun VersionsOperation(
-    versionsOperation: VersionsOperation,
-    updateVersionsOperation: (VersionsOperation) -> Unit,
-    submitError: (ErrorViewModel.ThrowableMessage) -> Unit
-) {
-    when(versionsOperation) {
-        is VersionsOperation.None -> {}
-        is VersionsOperation.Rename -> {
-            RenameVersionDialog(
-                version = versionsOperation.version,
-                onDismissRequest = { updateVersionsOperation(VersionsOperation.None) },
-                onConfirm = {
-                    updateVersionsOperation(
-                        VersionsOperation.RunTask(
-                            title = R.string.versions_manage_rename_version,
-                            task = {
-                                VersionsManager.renameVersion(versionsOperation.version, it)
-                            }
-                        )
-                    )
-                }
-            )
-        }
-        is VersionsOperation.Copy -> {
-            CopyVersionDialog(
-                onDismissRequest = { updateVersionsOperation(VersionsOperation.None) },
-                onConfirm = { name, copyAll ->
-                    updateVersionsOperation(
-                        VersionsOperation.RunTask(
-                            title = R.string.versions_manage_copy_version,
-                            task = { VersionsManager.copyVersion(versionsOperation.version, name, copyAll) }
-                        )
-                    )
-                }
-            )
-        }
-        is VersionsOperation.InvalidDelete -> {
-            updateVersionsOperation(
-                VersionsOperation.Delete(
-                    versionsOperation.version,
-                    stringResource(R.string.versions_manage_delete_version_tip_invalid)
-                )
-            )
-        }
-        is VersionsOperation.Delete -> {
-            val version = versionsOperation.version
-            DeleteVersionDialog(
-                version = version,
-                message = versionsOperation.text,
-                onDismissRequest = { updateVersionsOperation(VersionsOperation.None) },
-                onConfirm = { title, task ->
-                    updateVersionsOperation(
-                        VersionsOperation.RunTask(
-                            title = title,
-                            task = task
-                        )
-                    )
-                }
-            )
-        }
-        is VersionsOperation.RunTask -> {
-            SimpleTaskDialog(
-                title = stringResource(versionsOperation.title),
-                task = versionsOperation.task,
-                context = Dispatchers.IO,
-                onDismiss = { updateVersionsOperation(VersionsOperation.None) },
-                onError = { e ->
-                    Logger.error(TAG, "Failed to run task.", e)
-                    submitError(
-                        ErrorViewModel.ThrowableMessage(
-                            title = androidText(R.string.versions_manage_task_error),
-                            message = androidText(e.getMessageOrToString())
-                        )
-                    )
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun RenameVersionDialog(
-    version: Version,
-    onDismissRequest: () -> Unit = {},
-    onConfirm: (value: String) -> Unit = {}
-) {
-    var name by remember { mutableStateOf(version.getVersionName()) }
-
-    val filenameInvalidMessage = key(name) {
-        isFilenameInvalid(name)
-    }
-
-    val isVersionExists = remember(name) {
-        VersionsManager.isVersionExists(name, true)
-    }
-    val isError = name.isEmpty() || filenameInvalidMessage != null || isVersionExists
-
-    SimpleEditDialog(
-        title = stringResource(R.string.versions_manage_rename_version),
-        value = name,
-        onValueChange = { name = it },
-        isError = isError,
-        supportingText = {
-            when {
-                name.isEmpty() -> Text(stringResource(R.string.generic_cannot_empty))
-                filenameInvalidMessage != null -> Text(filenameInvalidMessage)
-                isVersionExists -> Text(stringResource(R.string.versions_manage_install_exists))
-            }
-        },
-        singleLine = true,
-        onDismissRequest = onDismissRequest,
-        onConfirm = {
-            if (!isError) {
-                onConfirm(name)
-            }
-        }
-    )
-}
-
-@Composable
-fun CopyVersionDialog(
-    onDismissRequest: () -> Unit = {},
-    onConfirm: (value: String, copyAll: Boolean) -> Unit = { _, _ -> }
-) {
-    var copyAll by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-
-    val filenameInvalidMessage = key(name) {
-        isFilenameInvalid(name)
-    }
-
-    val isVersionExists = remember(name) {
-        VersionsManager.isVersionExists(name, true)
-    }
-    val isError = name.isEmpty() || filenameInvalidMessage != null || isVersionExists
-
-    SimpleCheckEditDialog(
-        title = stringResource(R.string.versions_manage_copy_version),
-        text = stringResource(R.string.versions_manage_copy_version_tip),
-        checkBoxText = stringResource(R.string.versions_manage_copy_version_all),
-        checked = copyAll,
-        value = name,
-        onCheckedChange = { copyAll = it },
-        onValueChange = { name = it },
-        isError = isError,
-        supportingText = {
-            when {
-                name.isEmpty() -> Text(stringResource(R.string.generic_cannot_empty))
-                filenameInvalidMessage != null -> Text(filenameInvalidMessage)
-                isVersionExists -> Text(stringResource(R.string.versions_manage_install_exists))
-            }
-        },
-        singleLine = true,
-        onDismissRequest = onDismissRequest,
-        onConfirm = {
-            if (!isError) {
-                onConfirm(name, copyAll)
-            }
-        }
-    )
-}
-
-@Composable
-fun DeleteVersionDialog(
-    version: Version,
-    message: String? = null,
-    onDismissRequest: () -> Unit = {},
-    onConfirm: (title: Int, task: suspend () -> Unit) -> Unit = { _, _ -> },
-    onVersionDeleted: () -> Unit = {}
-) {
-    val deleteVersion = {
-        onConfirm(R.string.versions_manage_delete_version) {
-            VersionsManager.deleteVersion(version)
-            onVersionDeleted()
-        }
-    }
-
-    if (message != null) {
-        SimpleAlertDialog(
-            title = stringResource(R.string.versions_manage_delete_version),
-            text = message,
-            onDismiss = onDismissRequest,
-            onConfirm = deleteVersion
-        )
-    } else {
-        SimpleAlertDialog(
-            title = stringResource(R.string.versions_manage_delete_version),
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = stringResource(R.string.versions_manage_delete_version_tip_hint1, version.getVersionName()))
-                    Text(text = stringResource(R.string.versions_manage_delete_version_tip_hint2))
-                    Text(text = stringResource(R.string.versions_manage_delete_version_tip_hint3))
-                    Text(
-                        text = stringResource(R.string.versions_manage_delete_version_tip_hint4),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            },
-            onConfirm = deleteVersion,
-            onCancel = onDismissRequest,
-            onDismissRequest = onDismissRequest
-        )
-    }
-}
-
-@Composable
 fun CleanupOperation(
     operation: CleanupOperation,
     changeOperation: (CleanupOperation) -> Unit,
@@ -669,347 +423,6 @@ fun CleanupOperation(
             ) {
                 changeOperation(CleanupOperation.None)
             }
-        }
-    }
-}
-
-@Stable
-class VersionItemCallbacks(
-    val submitError: (ErrorViewModel.ThrowableMessage) -> Unit,
-    val onSelected: () -> Unit,
-    val onSettingsClick: () -> Unit,
-    val onRenameClick: () -> Unit,
-    val onCopyClick: () -> Unit,
-    val onDeleteClick: () -> Unit,
-    val onPinned: () -> Unit,
-    val onAddShortcutClick: () -> Unit
-)
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun VersionItemLayout(
-    version: Version,
-    selected: Boolean,
-    callbacks: VersionItemCallbacks,
-    modifier: Modifier = Modifier,
-    color: Color = itemColor(),
-    contentColor: Color = onItemColor()
-) {
-    val scale = remember { Animatable(initialValue = 0.95f) }
-    LaunchedEffect(Unit) {
-        scale.animateTo(targetValue = 1f, animationSpec = getAnimateTween())
-    }
-    Surface(
-        modifier = modifier.graphicsLayer(scaleY = scale.value, scaleX = scale.value),
-        color = color,
-        contentColor = contentColor,
-        shape = MaterialTheme.shapes.large,
-        onClick = {
-            if (selected) return@Surface
-            callbacks.onSelected()
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(shape = MaterialTheme.shapes.large)
-                .padding(all = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = selected,
-                onClick = {
-                    if (selected) return@RadioButton
-                    callbacks.onSelected()
-                }
-            )
-            CommonVersionInfoLayout(
-                modifier = Modifier.weight(1f),
-                version = version
-            )
-
-            IconButton(
-                onClick = {
-                    val currentValue = version.pinnedState
-                    runCatching {
-                        version.setPinnedAndSave(!currentValue)
-                    }.onFailure { e ->
-                        Logger.error(TAG, "Failed to save version config!", e)
-                        callbacks.submitError(
-                            ErrorViewModel.ThrowableMessage(
-                                title = androidText(R.string.versions_config_failed_to_save),
-                                message = androidText(e.getMessageOrToString())
-                            )
-                        )
-                    }.onSuccess {
-                        callbacks.onPinned()
-                    }
-                },
-                enabled = version.isValid()
-            ) {
-                Crossfade(
-                    targetState = version.pinnedState
-                ) { pinned ->
-                    val icon = if (pinned) {
-                        painterResource(R.drawable.ic_pinned_filled)
-                    } else {
-                        painterResource(R.drawable.ic_pinned_outlined)
-                    }
-                    Icon(
-                        modifier = Modifier.rotate(45.0f),
-                        painter = icon,
-                        contentDescription = stringResource(R.string.versions_manage_pin)
-                    )
-                }
-            }
-
-            IconButton(
-                onClick = callbacks.onSettingsClick,
-                enabled = version.isValid()
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_settings_filled),
-                    contentDescription = stringResource(R.string.versions_manage_settings)
-                )
-            }
-
-            Row {
-                var menuExpanded by remember { mutableStateOf(false) }
-
-                IconButton(onClick = { menuExpanded = !menuExpanded }) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(R.drawable.ic_more_horiz),
-                        contentDescription = stringResource(R.string.generic_more)
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    shape = MaterialTheme.shapes.large,
-                    shadowElevation = 3.dp,
-                    onDismissRequest = { menuExpanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.generic_rename)) },
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(20.dp),
-                                painter = painterResource(R.drawable.ic_edit_filled),
-                                contentDescription = stringResource(R.string.generic_rename)
-                            )
-                        },
-                        onClick = {
-                            callbacks.onRenameClick()
-                            menuExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.generic_copy)) },
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(20.dp),
-                                painter = painterResource(R.drawable.ic_file_copy_filled),
-                                contentDescription = stringResource(R.string.generic_copy)
-                            )
-                        },
-                        onClick = {
-                            callbacks.onCopyClick()
-                            menuExpanded = false
-                        }
-                    )
-DropdownMenuItem(
-                        text = { Text(text = stringResource(R.string.generic_delete)) },
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.size(20.dp),
-                                painter = painterResource(R.drawable.ic_delete_filled),
-                                contentDescription = stringResource(R.string.generic_delete)
-                            )
-                        },
-                        onClick = {
-                            callbacks.onDeleteClick()
-                            menuExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun CommonVersionInfoLayout(
-    version: Version,
-    modifier: Modifier = Modifier,
-    iconSize: Dp = 34.dp,
-) {
-    val isValid = remember(version) { version.isValid() }
-    val versionName = remember(version) { version.getVersionName() }
-    val isSummaryValid = remember(version) { version.isSummaryValid() }
-    val versionInfo = remember(version) { version.getVersionInfo() }
-
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        VersionIconImage(
-            modifier = Modifier.size(iconSize),
-            version = version
-        )
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            //版本名称
-            Text(
-                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                maxLines = 1,
-                text = versionName,
-                style = MaterialTheme.typography.labelLarge
-            )
-            //版本描述
-            if (isValid && isSummaryValid) {
-                val versionSummary = remember(version) {
-                    version.getVersionSummary()
-                }
-
-                Text(
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                    maxLines = 1,
-                    text = versionSummary,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
-            //版本详细信息
-            FlowRow(
-                modifier = Modifier.alpha(0.7f),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (!isValid) {
-                    LittleTextLabel(
-                        text = stringResource(R.string.versions_manage_invalid),
-                        color = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        textStyle = MaterialTheme.typography.labelSmall
-                    )
-                } else {
-                    versionInfo?.let { versionInfo ->
-                        Text(
-                            text = versionInfo.minecraftVersion,
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                        versionInfo.loaderInfo?.let { loaderInfo ->
-                            Text(
-                                text = loaderInfo.loader.displayName,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                            Text(
-                                text = loaderInfo.version,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    }
-                }
-            }
-            //游戏时间信息
-            if (isValid) {
-                PlayTimeInfoRow(versionName = versionName)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun PlayTimeInfoRow(versionName: String) {
-    val lastPlayed = remember(versionName) { PlayTimeRepository.getLastPlayed(versionName) }
-    val totalMs = remember(versionName) { PlayTimeRepository.getTotalPlayTime(versionName) }
-
-    if (lastPlayed == 0L && totalMs == 0L) return
-
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val lastPlayedText = remember(lastPlayed) {
-        if (lastPlayed == 0L) null
-        else {
-            val diff = System.currentTimeMillis() - lastPlayed
-            when {
-                diff < 60_000L -> context.getString(R.string.just_now)
-                diff < 3_600_000L -> context.getString(R.string.minutes_ago, (diff / 60_000L).toInt())
-                diff < 86_400_000L -> context.getString(R.string.hours_ago, (diff / 3_600_000L).toInt())
-                diff < 2_592_000_000L -> context.getString(R.string.days_ago, (diff / 86_400_000L).toInt())
-                diff < 31_536_000_000L -> context.getString(R.string.months_ago, (diff / 2_592_000_000L).toInt())
-                else -> context.getString(R.string.years_ago, (diff / 31_536_000_000L).toInt())
-            }
-        }
-    }
-    val totalText = remember(totalMs) {
-        if (totalMs == 0L) null
-        else {
-            val totalMinutes = (totalMs / 60_000L).toInt()
-            val hours = totalMinutes / 60
-            val minutes = totalMinutes % 60
-            if (hours > 0) context.getString(R.string.play_time_hours_minutes, hours, minutes)
-            else context.getString(R.string.play_time_minutes, minutes)
-        }
-    }
-
-    FlowRow(
-        modifier = Modifier.alpha(0.6f),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        lastPlayedText?.let {
-            Text(
-                text = stringResource(R.string.play_time_last_played, it),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-        totalText?.let {
-            Text(
-                text = stringResource(R.string.play_time_total, it),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-    }
-}
-
-@Composable
-fun VersionIconImage(
-    version: Version?,
-    modifier: Modifier = Modifier,
-    refreshKey: Any? = null
-) {
-    val defaultIconRes = remember(version) {
-        version?.let { getLoaderIconRes(it.getVersionInfo()?.loaderInfo?.loader) } ?: R.drawable.img_minecraft
-    }
-    val defaultIcon = painterResource(defaultIconRes)
-
-    val model = remember(version, refreshKey) {
-        version?.let {
-            val iconFile = VersionsManager.getVersionIconFile(it)
-            if (iconFile.exists()) iconFile
-            else null
-        } ?: defaultIcon
-    }
-
-    when (model) {
-        is Painter -> {
-            Image(
-                painter = model,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = modifier
-            )
-        }
-        else -> {
-            AsyncImage(
-                model = model,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = modifier
-            )
         }
     }
 }

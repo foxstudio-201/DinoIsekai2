@@ -19,9 +19,7 @@
 package com.movtery.zalithlauncher.ui.screens
 
 import com.movtery.zalithlauncher.R
-import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.ui.androidText
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -44,15 +42,6 @@ sealed interface NestedNavKey {
     @Serializable class Settings : BackStackNavKey<TitledNavKey>(androidText(R.string.generic_setting)) {
         init {
             backStack.addIfEmpty(NormalNavKey.Settings.Renderer)
-        }
-    }
-    /** 版本详细设置屏幕 */
-    @Serializable
-    class VersionSettings(@Contextual val version: Version) : BackStackNavKey<TitledNavKey>(
-        androidText(R.string.page_title_version_manage)
-    ) {
-        init {
-            backStack.addIfEmpty(NormalNavKey.Versions.OverView)
         }
     }
 }

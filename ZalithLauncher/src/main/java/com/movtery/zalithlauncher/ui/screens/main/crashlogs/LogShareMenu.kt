@@ -49,7 +49,6 @@ sealed interface LogShareMenuOperation {
 fun LogShareMenu(
     operation: LogShareMenuOperation,
     onChange: (LogShareMenuOperation) -> Unit,
-    onView: () -> Unit,
     onShare: () -> Unit,
     canUpload: Boolean,
     onUpload: () -> Unit
@@ -77,21 +76,6 @@ fun LogShareMenu(
                             .padding(all = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        //查看日志
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                onView()
-                                onChange(LogShareMenuOperation.None)
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_assignment_filled),
-                                contentDescription = null
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(text = stringResource(R.string.generic_view))
-                        }
                         //分享日志
                         Button(
                             modifier = Modifier.fillMaxWidth(),

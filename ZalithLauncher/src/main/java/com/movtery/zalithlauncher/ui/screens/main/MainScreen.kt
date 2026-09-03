@@ -77,7 +77,6 @@ import com.movtery.zalithlauncher.BuildKeys
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.coroutine.Task
 import com.movtery.zalithlauncher.coroutine.TaskSystem
-import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.path.URL_ORIGINAL_PROJECT
 import com.movtery.zalithlauncher.setting.AllSettings
@@ -98,15 +97,10 @@ import com.movtery.zalithlauncher.ui.screens.content.FileSelectorScreen
 import com.movtery.zalithlauncher.ui.screens.content.HomePageEditorScreen
 import com.movtery.zalithlauncher.ui.screens.content.LauncherScreen
 import com.movtery.zalithlauncher.ui.screens.content.LicenseScreen
-import com.movtery.zalithlauncher.ui.screens.content.GameStatsScreen
 import com.movtery.zalithlauncher.ui.screens.content.CapeGalleryScreen
-import com.movtery.zalithlauncher.ui.screens.content.PlayTimeStatsScreen
 import com.movtery.zalithlauncher.ui.screens.content.RecordingsScreen
-import com.movtery.zalithlauncher.ui.screens.content.LogViewScreen
 import com.movtery.zalithlauncher.ui.screens.content.SettingsScreen
-import com.movtery.zalithlauncher.ui.screens.content.VersionSettingsScreen
 import com.movtery.zalithlauncher.ui.screens.content.WebViewScreen
-import com.movtery.zalithlauncher.ui.screens.content.VersionsManageScreen
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
@@ -513,28 +507,16 @@ private fun NavigationUI(
     }
 
     if (backStack.isNotEmpty()) {
-        /** 导航至版本详细信息屏幕 */
-        val navigateToVersions: (Version) -> Unit = remember(screenBackStackModel) {
-            { version ->
-                screenBackStackModel.mainScreen.navigateTo(
-                    screenKey = NestedNavKey.VersionSettings(version),
-                    useClassEquality = true
-                )
-            }
-        }
-
         val provider = remember(
             screenBackStackModel,
             toMainScreen,
             eventViewModel,
-            submitError,
-            navigateToVersions
+            submitError
         ) {
             entryProvider {
                 entry<NormalNavKey.LauncherMain> {
                     LauncherScreen(
                         backStackViewModel = screenBackStackModel,
-                        navigateToVersions = navigateToVersions,
                         onLaunchGame = { version ->
                             val ver = version ?: VersionsManager.currentVersion.value
                             if (ver != null) {
@@ -545,21 +527,6 @@ private fun NavigationUI(
                                     )
                                 )
                             }
-                        },
-                        onOpenLink = {
-                            eventViewModel.sendEvent(EventViewModel.Event.OpenLink(it))
-                        },
-                        onHomePageEvent = { event ->
-                            eventViewModel.sendEvent(EventViewModel.Event.HomePage.Event(event))
-                        },
-                        onNavigateToStats = {
-                            backStack.navigateTo(NormalNavKey.GameStats)
-                        },
-                        onNavigateToPlayTimeStats = {
-                            backStack.navigateTo(NormalNavKey.PlayTimeStats)
-                        },
-                        onNavigateToLog = { logPath ->
-                            backStack.navigateTo(NormalNavKey.LogView(logPath))
                         }
                     )
                 }
@@ -601,14 +568,6 @@ private fun NavigationUI(
                         eventViewModel = eventViewModel
                     )
                 }
-                entry<NormalNavKey.VersionsManager> {
-                    VersionsManageScreen(
-                        backScreenViewModel = screenBackStackModel,
-                        navigateToVersions = navigateToVersions,
-                        eventViewModel = eventViewModel,
-                        submitError = submitError
-                    )
-                }
                 entry<NormalNavKey.FileSelector> { key ->
                     FileSelectorScreen(
                         key = key,
@@ -616,15 +575,6 @@ private fun NavigationUI(
                     ) {
                         backStack.removeLastOrNull()
                     }
-                }
-                entry<NestedNavKey.VersionSettings> { key ->
-                    VersionSettingsScreen(
-                        key = key,
-                        backScreenViewModel = screenBackStackModel,
-                        backToMainScreen = toMainScreen,
-                        eventViewModel = eventViewModel,
-                        submitError = submitError
-                    )
                 }
                 entry<NormalNavKey.BuiltInFileManager> { key ->
                     BuiltInFileManagerScreen(
@@ -645,22 +595,6 @@ private fun NavigationUI(
                 }
                 entry<NormalNavKey.HomePageEditor> {
                     HomePageEditorScreen(
-                        backStackViewModel = screenBackStackModel,
-                    )
-                }
-                entry<NormalNavKey.LogView> { key ->
-                    LogViewScreen(
-                        key = key,
-                        backStackViewModel = screenBackStackModel,
-                    )
-                }
-                entry<NormalNavKey.GameStats> {
-                    GameStatsScreen(
-                        backStackViewModel = screenBackStackModel,
-                    )
-                }
-                entry<NormalNavKey.PlayTimeStats> {
-                    PlayTimeStatsScreen(
                         backStackViewModel = screenBackStackModel,
                     )
                 }

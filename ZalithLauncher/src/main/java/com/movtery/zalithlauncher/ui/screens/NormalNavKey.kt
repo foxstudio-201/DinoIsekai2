@@ -48,10 +48,6 @@ sealed interface NormalNavKey : TitledNavKey {
     }
     /** Web屏幕 */
     @Serializable data class WebScreen(val url: String) : NormalNavKey
-    /** 版本管理屏幕 */
-    @Serializable data object VersionsManager : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.page_title_version_list)
-    }
     /** 文件选择屏幕 */
     @Serializable data class FileSelector(
         val startPath: String,
@@ -72,13 +68,6 @@ sealed interface NormalNavKey : TitledNavKey {
         val filePath: String
     ) : NormalNavKey {
         @Contextual override val title: AndroidStringText = androidText(R.string.page_title_file_editor)
-    }
-
-    /** 查看日志屏幕 */
-    @Serializable data class LogView(
-        val logPath: String
-    ) : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.versions_overview_log)
     }
 
     /** 设置嵌套子屏幕 */
@@ -119,36 +108,6 @@ sealed interface NormalNavKey : TitledNavKey {
         @Serializable data object AboutInfo : Settings {
             @Contextual override val title: AndroidStringText = androidText(R.string.settings_tab_info_about)
         }
-    }
-
-    /** 版本详细设置嵌套子屏幕 */
-    sealed interface Versions : NormalNavKey {
-        /** 版本概览屏幕 */
-        @Serializable data object OverView : Versions {
-            @Contextual override val title: AndroidStringText = androidText(R.string.versions_settings_overview)
-        }
-        /** 版本配置屏幕 */
-        @Serializable data object Config : Versions {
-            @Contextual override val title: AndroidStringText = androidText(R.string.versions_settings_config)
-        }
-        /** 截屏管理屏幕 */
-        @Serializable data object ScreenshotsManager : Versions {
-            @Contextual override var title: AndroidStringText = androidText(R.string.screenshots_manage)
-        }
-        /** 服务器列表屏幕 */
-        @Serializable data object ServerList : Versions {
-            @Contextual override val title: AndroidStringText = androidText(R.string.servers_list)
-        }
-    }
-
-    /** 游戏统计屏幕 */
-    @Serializable data object GameStats : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.stats_game_stats)
-    }
-
-    /** 游戏时间统计屏幕 */
-    @Serializable data object PlayTimeStats : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.stats_play_time_title)
     }
 
     /** 协议展示屏幕 */

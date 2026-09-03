@@ -73,7 +73,6 @@ import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.content.elements.Background
 import com.movtery.zalithlauncher.ui.screens.content.elements.LaunchGameOperation
-import com.movtery.zalithlauncher.ui.screens.content.navigateToLogView
 import com.movtery.zalithlauncher.ui.screens.content.navigateToWeb
 import com.movtery.zalithlauncher.ui.screens.main.MainScreen
 import com.movtery.zalithlauncher.ui.screens.main.crashlogs.LogShareMenu
@@ -283,11 +282,6 @@ class MainActivity : BaseAppCompatActivity() {
                     is EventViewModel.Event.VulkanCheck -> {
                         checkVulkan()
                     }
-                    is EventViewModel.Event.OpenLog -> {
-                        screenBackStackModel.mainScreen.backStack.navigateToLogView(
-                            logPath = event.path
-                        )
-                    }
                     else -> {
                         //忽略
                     }
@@ -351,10 +345,7 @@ class MainActivity : BaseAppCompatActivity() {
                             )
                         },
                         toVersionManageScreen = {
-                            screenBackStackModel.mainScreen.removeAndNavigateTo(
-                                remove = NestedNavKey.VersionSettings::class,
-                                screenKey = NormalNavKey.VersionsManager
-                            )
+                            screenBackStackModel.mainScreen.clearWith(NormalNavKey.LauncherMain)
                         }
                     )
                 }
@@ -398,12 +389,6 @@ class MainActivity : BaseAppCompatActivity() {
                             if (operation == LogShareMenuOperation.None) {
                                 logShareViewModel.closeMenu()
                             }
-                        },
-                        onView = {
-                            screenBackStackModel.mainScreen.backStack.navigateToLogView(
-                                logPath = logFile.absolutePath
-                            )
-                            logShareViewModel.closeMenu()
                         },
                         onShare = {
                             shareFile(this@MainActivity, logFile)
