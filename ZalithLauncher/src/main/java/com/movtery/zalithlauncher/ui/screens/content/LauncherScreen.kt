@@ -82,6 +82,8 @@ import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.AccountType
 import com.movtery.zalithlauncher.game.account.localLogin
 import com.movtery.zalithlauncher.game.addons.modloader.forgelike.forge.ForgeVersions
+import com.movtery.zalithlauncher.game.dinostate.DinoStateSync
+import com.movtery.zalithlauncher.game.dinostate.DinoStateType
 import com.movtery.zalithlauncher.game.download.game.GameDownloadInfo
 import com.movtery.zalithlauncher.game.download.game.GameInstaller
 import com.movtery.zalithlauncher.game.version.installed.Version
@@ -148,10 +150,68 @@ private fun DinoHomepage(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    var dinoSyncStatus by remember { mutableStateOf<String?>(null) }
+    var dinoSyncing by remember { mutableStateOf(false) }
+    var dinoSyncPercent by remember { mutableStateOf(0) }
+    var dinoSyncMessage by remember { mutableStateOf("") }
+    val dinoScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         while (true) {
             pingResult = com.movtery.zalithlauncher.game.ServerPing.ping("160.250.134.97", 3026)
             kotlinx.coroutines.delay(8000)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(2000)
+        dinoScope.launch {
+            dinoSyncStatus = null
+            var version: Version? = null
+            try {
+                repeat(3) {
+                    VersionsManager.refresh("[Home] dino", FIXED_VERSION_NAME)
+                    VersionsManager.waitForRefresh()
+                    version = VersionsManager.getVersion(FIXED_VERSION_NAME)
+                    if (version != null) return@repeat
+                    kotlinx.coroutines.delay(1500)
+                }
+                val gameDir = version?.getGameDir()
+                if (gameDir == null) {
+                    dinoSyncStatus = "Chưa cài game, bỏ qua cập nhật dữ liệu"
+                    return@launch
+                }
+
+                dinoSyncing = true
+                var baseDone = false
+                val results = mutableListOf<String>()
+                DinoStateType.entries.forEach { type ->
+                    DinoStateSync.runSync(type, gameDir) { p ->
+                        if (p.phase == "done") {
+                            dinoSyncStatus = p.message
+                            dinoSyncMessage = ""
+                            dinoSyncPercent = 0
+                            results.add(p.message)
+                            if (type == DinoStateType.BASE) baseDone = true
+                        } else {
+                            if (baseDone) {
+                                dinoSyncStatus = results.lastOrNull()
+                            }
+                            dinoSyncMessage = p.message
+                            dinoSyncPercent = p.percent
+                        }
+                    }
+                }
+                dinoSyncStatus = results.distinct().joinToString(" · ")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                dinoSyncStatus = "Không thể đồng bộ dữ liệu: ${e.message ?: "lỗi không xác định"}"
+            } finally {
+                dinoSyncing = false
+                dinoSyncMessage = ""
+                dinoSyncPercent = 0
+            }
         }
     }
 
@@ -265,6 +325,28 @@ private fun DinoHomepage(
                             color = Color(0xAAFFFFFF)
                         )
                     )
+                }
+            }
+
+            if (dinoSyncing || dinoSyncStatus != null) {
+                Spacer(Modifier.height(10.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (dinoSyncing) {
+                        Text(
+                            text = "Dữ liệu: $dinoSyncMessage${if (dinoSyncPercent > 0) " $dinoSyncPercent%" else ""}",
+                            color = Color(0xFFA78BFA),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    dinoSyncStatus?.let { status ->
+                        Text(
+                            text = status,
+                            color = Color(0xFFFACC15),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
 
